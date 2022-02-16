@@ -1,0 +1,562 @@
+---
+title: "Chapter_Crue: Tidy data and prepare datasets"
+author: "Aline Carvalho"
+date: "09/03/2021"
+output:
+  pdf_document: default
+  html_document: default
+editor_options:
+  chunk_output_type: console
+---
+
+# Changes in MP pollutiong during flood are modulated by urbanization
+
+```{r libraries}
+library(readxl)
+library(tidyverse)
+library(baseline)
+```
+
+## Pre-objective: tidydata
+
+## October 2018 Crue analysis
+
+#### Data synthesis: MP concentration 
+
+```{r read_samplingA}
+#setwd("C:/Users/postdoc/OneDrive/2. Doutorado/99. Redaction_Articles_these/Z. These/1.RMarkdown_chapters")
+lmp_samplingA <- read_xlsx("rawdata/data_PLASTIGAR_25092020_A.xlsx")
+
+lmp_samplingA <- lmp_samplingA %>%
+  filter(Sampling_gear == "FILET") %>%
+  filter(Mesh_size == "500") %>%
+  filter(Season == "A") %>%
+  mutate(Volume = as.numeric(Volume)) %>%
+  mutate(nb_particles = as.numeric(nb_particles))%>%
+  mutate(particles_m3 = nb_particles / Volume)%>%
+  mutate(NTU = as.numeric(NTU)) %>%
+  mutate(`Debit (m3/s)` = as.numeric(`Debit (m3/s)`))%>%
+  mutate(Site=ifelse(Code_station == 6, "MUG",
+                     ifelse(Code_station == 11, "GSG", Code_station)))%>%
+  mutate(particles_m3_cor = particles_m3 * 0.7848982) # correct for the microplastic rate based on Flood B
+
+lmp_samplingA_crue <- lmp_samplingA %>%
+  filter(Code_station == 6 | Code_station == 11) 
+```
+
+```{r write_samplinA}
+write.csv(lmp_samplingA_crue, "data/lmp_samplingA_crue.csv")
+```
+
+## May/June 2019 Crue analysis
+
+### Data synthesis: Particles
+
+```{r read_lmpwater}
+lmp_water <- read_xlsx("rawdata/LMP_water_loupe_V11_shape.xlsx")
+names(lmp_water)
+lmp_particles <- lmp_water %>%
+  filter(Season!= "A" & Season!= "B" & Season != "E") %>%
+  filter(Sampling_gear=="FILET")%>%
+  filter(Site==6 | Site==8 | Site==11)
+
+length(unique(lmp_particles$Sample_ID))
+unique(lmp_particles$Color)
+
+lmp_particles <- lmp_particles %>%
+  mutate(Color = as.character(Color)) %>%
+  mutate(Color = replace(Color, Color == "Pink", "Red"))%>%
+  mutate(Color = replace(Color, Color == "blue", "Blue"))%>%
+  mutate(Color = replace(Color, Color == "black", "Black"))%>%
+  mutate(Color = replace(Color, Color == "green", "Green"))%>%
+  mutate(Color = replace(Color, Color == "white", "White"))%>%
+  mutate(Color = replace(Color, Color == "brown", "Red"))%>%
+  mutate(Color = replace(Color, Color == "red", "Red"))%>%
+  mutate(Color = replace(Color, Color == "grey", "Grey"))%>%
+  mutate(Color = replace(Color, Color == "Purple", "Red"))%>%
+  mutate(Color = replace(Color, Color == "orange", "Red"))%>%
+  mutate(Color = replace(Color, Color == "purple", "Red"))%>%
+  mutate(Color = replace(Color, Color == "pink", "Red"))%>%
+  mutate(Color = replace(Color, Color == "transparent", "White")) %>%
+  mutate(Color = replace(Color, Color == "Brown", "Red"))%>%
+  mutate(Color = replace(Color, Color == "Transparent", "White"))
+
+unique(lmp_particles$IR_ID)
+
+lmp_particles <- lmp_particles %>%
+  mutate(IR_ID = as.character(IR_ID)) %>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "CELLULOSE", "non-plastic"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "STEARATE DE CALCIUM", "Additive"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "calcium stearate", "Additive"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "à determiner", "NA"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "à déterminer", "NA"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "RUBBER (SBR)" , "Polydienes"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "ADDITIVES", "Additive"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "OLEFIN", "Additive"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "poly(éthylène-propylène )", "PP"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "MINERAL", "non-plastic"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "ASPHALT A-67", "Asphalt"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "RUBBER (EPR)", "Polydienes"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "RUBBER", "Polydienes"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "Parafin", "Additive"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "glicerol trioleate", "Additive"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "weston 619", "Additive"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "asphalt", "Asphalt"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "PBS", "Additive"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "Aragonite", "non-plastic"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "pp", "PP"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "PSEB", "Polydienes"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "poly butylene terephthalate", "Polyester"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "POLYESTER", "Polyester"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "SEB", "Polydienes"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "kodak epolene", "PE"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "Styrene/ACN copolymer", "PS"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "AC 175", "Additive"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "NYLON", "Polyamide"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "PDMS", "Polisiloxane"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "polydimethylsiloxane", "Polisiloxane"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "Styrene/ACN copolymer", "PS"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "THERMOPLASTIQUES", "Polydienes"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "poly(styrene décaméthylène)", "Polydienes"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "POLYURETHANE", "PU")) %>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "AC 715", "Additive"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "THERMOPLASTIQUE", "Polydienes"))%>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "ACRYLATE", "Polyacrylate")) %>%
+  mutate(IR_ID = replace(IR_ID, IR_ID == "polyacrylate", "Polyacrylate"))
+
+names(lmp_particles)
+
+lmp_particles <- lmp_particles %>%
+    mutate(Length_mm = as.numeric(Length_mm)) %>%
+    filter(IR_ID != "NA") %>%
+   filter(IR_ID != "NS")%>%
+  filter(IR_ID != "à determiner") %>%
+   filter(IR_ID != "non-plastic") %>%
+  filter(Length_mm >= 0.7) %>%
+  filter (Length_mm <= 5) %>%
+  mutate(Area = as.numeric(Area)) %>%
+  mutate(Perim = as.numeric(Perim)) %>%
+  mutate(Weight_mg = as.numeric(Weight_mg))
+
+lmp_particles<-lmp_particles%>%mutate_if(is.character, ~replace(., is.na(.), "NA"))
+
+length(unique(lmp_particles$Sample_ID))
+```
+
+```{r tidydata_lmpwater}
+# Create ID_particle
+lmp_particles <- unite (lmp_particles,"ID_particle", Box_ID:Box_Position,sep="-") # without BOX_ID
+
+#Standarlize Sample_ID
+names(lmp_particles)
+
+lmp_particles <- lmp_particles[,c(1,2,4,5,3,6,7,8,10,11,15,13,19,20,21,22)]
+lmp_particles <- unite (lmp_particles, "Sample_ID", Site : Replica : Season , sep="-", remove = FALSE)
+length(unique(lmp_particles$Sample_ID))
+```
+
+### Data synthesis: Sampling
+
+```{r read_dataPLASTIGAR}
+lmp_sampling <- read_xlsx("rawdata/data_PLASTIGAR_25092020.xlsx")
+
+names(lmp_sampling)
+
+lmp_sampling <- lmp_sampling[,c(1,6,7,8,9,15,18,25)]
+
+lmp_sampling <- lmp_sampling %>%
+  filter(Season== "C" | Season == "C1" | Season == "C2" | Season == "C3" | Season =="C4" | Season == "D") %>%
+  filter(Sampling_gear=="FILET")%>%
+  filter(Code_station==6 | Code_station==8 | Code_station==11)%>%
+  filter(Mesh_size=="500")%>%
+  filter(Replicate<=3)
+
+lmp_sampling <- lmp_sampling[,c(1,4,5,6,7,8)]
+
+lmp_sampling <- unite (lmp_sampling, "Sample_ID", Code_station : Replicate : Season , sep="-", remove = FALSE)
+
+names(lmp_sampling)
+
+lmp_sampling <- lmp_sampling %>%
+  mutate(Code_station = replace(Code_station, Code_station == '6', "MUG")) %>%
+  mutate(Code_station = replace(Code_station, Code_station == '8', "LAU")) %>%
+  mutate(Code_station = replace(Code_station, Code_station == '11', "GSG")) %>% 
+  mutate(river=ifelse(Code_station=="GSG", "Garonne",
+                      ifelse(Code_station=="MUG", "Garonne","Tributary")))
+
+length(unique(lmp_sampling$Sample_ID))
+```
+
+### MP concentration (number & mass): Data synthesis
+
+```{r tidydata_lmpcruequanti}
+names(lmp_particles)
+
+lmp_particlesv2 <- lmp_particles %>%
+  group_by(Site,Sample_ID,Replica,Season)%>%
+  summarise(Nb_plastic = n(), mass_plastic_mg=sum(Weight_mg, na.rm = TRUE))
+
+#Join field data with quantity of plastic per sample data => lmp_crue
+lmp_crue <- right_join(lmp_particlesv2, lmp_sampling, by=c("Sample_ID"), keep = FALSE, copy = FALSE)
+
+names(lmp_crue)
+
+lmp_crue <- lmp_crue %>%
+  mutate(Volume=as.numeric(Volume))%>%
+  mutate(Conc_nb_plastic_m3 = Nb_plastic / Volume, 
+         Conc_mass_plastic_mg_m3 = mass_plastic_mg / Volume)%>%
+  mutate_if(is.numeric, ~replace(., is.na(.), 0))%>%
+  mutate(Site=as.character(Site))%>%
+  mutate(Replica=as.character(Replica))%>%
+  mutate(Site=ifelse(Sample_ID=="6-1-C1", "6", Site))%>%
+  mutate(Site=ifelse(Sample_ID=="6-1-C2", "6", Site))%>%
+  mutate(Site=ifelse(Sample_ID=="6-1-C4", "6", Site))%>%
+  mutate(Site=ifelse(Sample_ID=="6-2-C1", "6", Site))%>%
+  mutate(Site=ifelse(Sample_ID=="6-3-C2", "6", Site))%>%
+  mutate(Site=ifelse(Sample_ID=="11-2-D", "11", Site))%>%
+  mutate(Replica=ifelse(Sample_ID=="6-1-C1", "1", Replica))%>%
+  mutate(Replica=ifelse(Sample_ID=="6-1-C2", "1", Replica))%>%
+  mutate(Replica=ifelse(Sample_ID=="6-1-C4", "1", Replica))%>%
+  mutate(Replica=ifelse(Sample_ID=="6-2-C1", "2", Replica))%>%
+  mutate(Replica=ifelse(Sample_ID=="6-3-C2", "3", Replica))%>%
+  mutate(Replica=ifelse(Sample_ID=="11-2-D", "2", Replica)) %>%
+  mutate(`Debit (m3/s)` = as.numeric(`Debit (m3/s)`))%>%
+  mutate(NTU=as.numeric(NTU)) 
+
+lmp_crue <- lmp_crue %>%
+   mutate(Season.y = replace(Season.y, Season.y == "C", "B1")) %>%
+  mutate(Season.y = replace(Season.y, Season.y == "C1", "B2")) %>%
+  mutate(Season.y = replace(Season.y, Season.y == "C2", "B3")) %>%
+  mutate(Season.y = replace(Season.y, Season.y == "C3", "B4")) %>%
+  mutate(Season.y = replace(Season.y, Season.y == "C4", "B5")) %>%
+  mutate(Season.y = replace(Season.y, Season.y == "D", "B6")) %>% 
+  mutate(Flood = ifelse(Season.y == "B1", 'Without', 
+                        ifelse(Season.y == "B2", 'Without',
+                               ifelse(Season.y == "B3", 'Without', 
+                                      ifelse(Season.y == "B4", 'With',
+                                             ifelse(Season.y == "B5", 'Without',
+                                                    ifelse(Season.y == "B6", 'Without', Season.y)))))))
+
+lmp_crue <- lmp_crue %>%
+  mutate(Code_station = replace(Code_station, Code_station == '6', "MUG")) %>%
+  mutate(Code_station = replace(Code_station, Code_station == '8', "LAU")) %>%
+  mutate(Code_station = replace(Code_station, Code_station == '11', "GSG")) %>% 
+  mutate(river=ifelse(Code_station=="GSG", "Garonne",
+                      ifelse(Code_station=="MUG", "Garonne","Tributary")))
+
+lmp_crue$Code_station <- factor(lmp_crue$Code_station , levels=c("MUG","GSG","LAU"))
+
+names(lmp_crue)
+lmp_crue %>%
+  group_by(Code_station) %>%
+  summarise(meannb = mean(Conc_nb_plastic_m3), meanmass = mean(Conc_mass_plastic_mg_m3))
+```
+
+```{r write_lmpcrue}
+write.csv(lmp_crue, "rawdata/lmp_crue.csv")
+```
+
+### MP characteristics: Shape descriptors
+
+1) Corey Shape Factor (CSF) = H/((LW)^1/2)
+
+2) Sphericity = (WH/(L^2))^1/3
+
+3) Shape legend (equivalent width):
+
+1 = line (W = H)
+2 = film (W = 0.08)
+3 = fragment (W = 0.33)
+4 = pellet (W = L/2)
+5 = bead/sphere (W = (L+H/2))
+
+```{r tidydata_lmpparticles}
+names(lmp_particles)
+
+lmp_particles <- lmp_particles %>%
+  mutate(Largeur_mm = as.numeric(Largeur_mm)) %>%
+  mutate(L = Length_mm) %>%
+  mutate(H = Largeur_mm) %>%
+  mutate(W = ifelse(Shape == "1", H, ifelse
+                    (Shape == "2", 0.08, ifelse
+                      (Shape == "3", 0.33, ifelse
+                        (Shape == "4", L/2, ifelse
+                          (Shape == "5", ((L+H)/2), Shape)))))) %>%
+  mutate(L = as.numeric(L)) %>%
+  mutate(H = as.numeric(H)) %>%
+  mutate(W = as.numeric(W)) %>%
+  mutate(CSF = H/((L*W)^(1/2))) %>% # CSF
+  mutate(Spher = ((W*H/(L^2))^(1/3))) %>% # Sphericity
+  mutate(Shapes = ifelse(Shape == "1", "line", ifelse
+                          (Shape == "2", "film", ifelse
+                            (Shape == "3", "fragment", ifelse
+                              (Shape == "4", "pellet", ifelse
+                                (Shape == "5", "sphere", Shape)
+                            )))))
+
+lmp_particles$Shapes <- factor(lmp_particles$Shapes, levels=c("line", "film", "fragment", "pellet", "sphere"))
+
+ggplot(lmp_particles, aes(x = Shapes, y = Spher, fill = Shapes))+
+  geom_boxplot(alpha=0.5) +
+  ylab("Sphericity") +
+  ggtitle("MP sphericity", subtitle = "Among shapes categories (n=1580)")+
+  xlab("Shape") +
+  scale_fill_brewer(palette = "RdBu") +
+  theme_classic(base_size = 18) 
+```
+
+### MP characteristics: New categories
+
+```{r tidydata_lmpcruequal}
+lmp_crue_qual <- right_join(lmp_particles, lmp_sampling, by=c("Sample_ID"), keep = FALSE, copy = FALSE)
+
+lmp_crue_qual <- lmp_crue_qual %>%
+  mutate(Volume=as.numeric(Volume))%>%
+  mutate_if(is.numeric, ~replace(., is.na(.), 0))%>%
+  mutate(Site=as.character(Site))%>%
+  mutate(Replica=as.character(Replica))%>%
+  mutate(Site=ifelse(Sample_ID=="6-1-C1", "6", Site))%>%
+  mutate(Site=ifelse(Sample_ID=="6-1-C2", "6", Site))%>%
+  mutate(Site=ifelse(Sample_ID=="6-1-C4", "6", Site))%>%
+  mutate(Site=ifelse(Sample_ID=="6-2-C1", "6", Site))%>%
+  mutate(Site=ifelse(Sample_ID=="6-3-C2", "6", Site))%>%
+  mutate(Site=ifelse(Sample_ID=="11-2-D", "11", Site))%>%
+  mutate(Replica=ifelse(Sample_ID=="6-1-C1", "1", Replica))%>%
+  mutate(Replica=ifelse(Sample_ID=="6-1-C2", "1", Replica))%>%
+  mutate(Replica=ifelse(Sample_ID=="6-1-C4", "1", Replica))%>%
+  mutate(Replica=ifelse(Sample_ID=="6-2-C1", "2", Replica))%>%
+  mutate(Replica=ifelse(Sample_ID=="6-3-C2", "3", Replica))%>%
+  mutate(Replica=ifelse(Sample_ID=="11-2-D", "2", Replica)) %>%
+  mutate(`Debit (m3/s)` = as.numeric(`Debit (m3/s)`))%>%
+  mutate(NTU=as.numeric(NTU)) %>%
+  mutate(Site = replace(Site, Site == '6', "MUG")) %>%
+  mutate(Site = replace(Site, Site == '8', "LAU")) %>%
+  mutate(Site = replace(Site, Site == '11', "GSG")) %>% 
+  mutate(river=ifelse(Site=="GSG", "Garonne",
+                      ifelse(Site=="MUG", "Garonne","Tributary"))) %>%
+  filter(Nb_particules > 0) %>%
+  mutate(IR_ID_bis= ifelse(IR_ID=="Additive",'others', IR_ID )) %>%
+  mutate(IR_ID_bis= ifelse(IR_ID_bis=="Polyester",'others', IR_ID_bis )) %>%
+  mutate(IR_ID_bis= ifelse(IR_ID_bis=="PU",'others', IR_ID_bis )) %>%
+  mutate(IR_ID_bis= ifelse(IR_ID_bis=="Polydienes",'others', IR_ID_bis )) %>%
+  mutate(IR_ID_bis= ifelse(IR_ID_bis=="Polyacrylate",'others', IR_ID_bis )) %>%
+  mutate(IR_ID_bis= ifelse(IR_ID_bis=="Asphalt",'others', IR_ID_bis )) %>%
+  mutate(IR_ID_bis= ifelse(IR_ID_bis=="EVA",'others', IR_ID_bis )) %>%
+  mutate(IR_ID_bis= ifelse(IR_ID_bis=="Polisiloxane",'others', IR_ID_bis )) %>%
+  mutate(Flood = ifelse(Season.y == "C", 'Without', 
+                        ifelse(Season.y == "C1", 'Without',
+                               ifelse(Season.y == "C2", 'Without', 
+                                      ifelse(Season.y == "C3", 'With',
+                                             ifelse(Season.y == "C4", 'Without',
+                                                    ifelse(Season.y == "D", 'Without', Season.y)))))))%>%
+  mutate(Sampling_event = ifelse(Season.y == "C", 'B1', 
+                        ifelse(Season.y == "C1", 'B2',
+                               ifelse(Season.y == "C2", 'B3', 
+                                      ifelse(Season.y == "C3", 'B4',
+                                             ifelse(Season.y == "C4", 'B5',
+                                                    ifelse(Season.y == "D", 'B6', Season.y)))))))
+
+# due to low quantity of particles in some flood days (d2 and d1 for MUG), a new group was created: before, during and after flood
+  
+lmp_crue_qual$Site <- factor(lmp_crue_qual$Site , levels=c("MUG","GSG","LAU"))
+
+lmp_crue_qual$IR_ID_bis <- factor(lmp_crue_qual$IR_ID_bis,levels=c("PE", "PS", "PP", "others"))
+
+lmp_crue_qual$Flood <- factor(lmp_crue_qual$Flood, levels=c("Without","With"))
+```
+
+```{r write_lmpcruequal}
+write.csv(lmp_crue_qual, "rawdata/lmp_crue_qual.csv")
+```
+
+### MP ATR-FTIR: 
+
+#### Function stdfilename & readIR
+
+```{r stdfilenamefunc}
+std_filename = function(){
+  file_list = list.files()
+  for(file in file_list){
+    name = file %>% str_replace_all("@@", "") %>%
+    str_replace_all(".CSV", "") %>%
+    str_replace_all("_", "") %>%
+    str_replace_all("-", "") %>%
+    str_replace_all("[A]", "-A") %>%
+    str_replace_all("[B]", "-B") %>%
+    str_replace_all("[C]", "-C") %>%
+    str_replace_all("[D]", "-D") %>%
+    str_replace_all("[E]", "-E") %>%
+    str_replace_all("[F]", "-F") %>%
+    str_replace_all("[G]", "-G") %>%
+    str_replace_all("[H]", "-H")
+    temp_dataset = read_csv(file, col_names = c("wl", name))
+    temp_dataset = temp_dataset %>%
+      drop_na() %>%
+      mutate(wl=as.numeric(wl)) %>% 
+      mutate(wl=round(wl, digits=2))
+    if(exists("dataset")){
+      dataset <- inner_join(dataset, temp_dataset, by = "wl")
+    } else{
+      dataset = temp_dataset
+    }
+      }
+  dataset %>%
+    drop_na()
+  return(dataset)
+}
+  
+```
+
+```{r readirfunc}
+readir = function(){
+  file_list <- list.files()
+  #dataset = tibble(wl=1.2)
+  for(file in file_list){
+    name = file
+    temp_dataset = read_csv(file, col_names = c("wl", name))
+    temp_dataset = temp_dataset %>%
+      drop_na() %>%
+      mutate(wl=as.numeric(wl)) %>% 
+      mutate(wl=round(wl, digits=2))
+    if(exists("dataset")){
+      dataset <- inner_join(dataset, temp_dataset, by = "wl")
+    } else{
+      dataset = temp_dataset
+    }
+    #dataset <- right_join(dataset, temp_dataset, by = "wl")
+  }
+  dataset %>%
+    drop_na()
+  return(dataset)
+}
+```
+
+#### Organize dataset
+
+```{r read_specpe}
+#setwd("rawdata/PE")
+#pe_db = std_filename()
+```
+
+```{r write_specpe}
+#setwd("")
+#write_csv(pe_db, file="rawdata/pe_db.csv")
+pe_db=read_csv(file="data/pe_db.csv")
+```
+
+```{r dataframes_specs}
+pe_df = as.data.frame(t(pe_db)) # 541 obs of 7400 variables
+colnames(pe_df) <- pe_df[1,] # change col names by copying the first row
+pe_df = pe_df[-1,] # delete the first row
+
+wl <- colnames(pe_df)
+```
+
+```{r}
+lmp_crue_qual = read.csv("rawdata/lmp_crue_qual.csv")
+lmp_crue_qual_gar <- lmp_crue_qual %>%
+  filter(river=="Garonne")
+```
+
+```{r innerjoinspecGAR}
+pe_df = pe_df %>% mutate(ID_particle=rownames(pe_df))
+pe_gar = inner_join (lmp_crue_qual_gar, pe_df, by="ID_particle") # 72 obs of 7432 var
+pe_gar_spec = pe_gar[,-(1:32)]
+pe_gar_qual = pe_gar[,(1:32)]
+```
+
+#### Spectra pre-treatment
+
+##### PE
+
+###### Garonne
+
+```{r plot_spec}
+names(pe_gar)
+pe_gar_gsg <- pe_gar %>%
+  filter(Site == "GSG")
+pe_gar_gsg_mat <- as.matrix(pe_gar_gsg[,33:7432])
+g = matplot(wl, t(pe_gar_gsg_mat), type="l", xlab="wavenumber (cm-1)", ylab="absorbance")
+
+```
+
+```{r pretreat_peGAR}
+pe_gar_mat <- as.matrix(pe_gar_spec)
+# 72 obs of 7400 variables
+matplot(wl, t(pe_gar_mat), type="l", xlab="wavenumber", ylab="absorbance")
+
+# BASELINE CORRECTION (by Kedzierski et al, 2019; Liland 2015)
+
+t = baseline(pe_gar_mat, lambda=4, hwi=50, it=10, int=740, method='fillPeaks')
+#x = t@spectra # original
+#u = t@baseline # baseline to be subtracted
+pe_gar_mat_base = as.matrix(t@corrected) # corrected
+
+matplot(wl, t(pe_gar_mat_base), type="l", xlab="wavenumber", ylab="absorbance")
+
+# Tests
+#x = pe_gar_mat[1,]
+#y = scale(pe_gar_mat[1:10,], scale=FALSE, center = TRUE)
+#z = scale(t(pe_gar_mat[1:5,]), scale=FALSE, center = TRUE)
+
+#matplot(wl, x, type="l", xlab="wavenumber", ylab="absorbance")
+
+# NORMALIZATION BY THE SUM (by Jung et al, 2018)
+v1 <- colSums(t(pe_gar_mat_base))
+pe_gar_mat_base_sum_norm <- pe_gar_mat_base / v1
+matplot(wl, t(pe_gar_mat_base_sum_norm), type="l", xlab="wavenumber", ylab="absorbance")
+
+# t <- colSums(t(pe_gar_mat_base_sum_norm)) #test
+
+#pe_gar_mat_base_norm <- scale(t(pe_gar_mat_base), scale=FALSE, center = TRUE)
+# so then each columns represents a spectra
+#pe_gar_mat_base_norm  <- t(pe_gar_mat_base_norm) #return to the matrix where each row is a spectra to perform PCA
+#matplot(wl, t(pe_gar_mat_base_norm), type="l", xlab="wavenumber", ylab="absorbance")
+# one spectra outlier -> remove spectra "6" 
+# (equivalent = 20-A1)
+
+pe_gar_mat_base_sum_norm <- pe_gar_mat_base_sum_norm [-6,]
+matplot(wl, t(pe_gar_mat_base_sum_norm), type="l", xlab="wavenumber", ylab="absorbance")
+
+pe_gar_qual2 <- pe_gar_qual %>%
+  filter(ID_particle != "20-A1" ) 
+
+pe_gar_qual2 = pe_gar_qual2 %>%
+  select(c(1,8,30,31,32))
+
+pe_gar_qual_spec <- bind_cols(pe_gar_qual2, as.data.frame(pe_gar_mat_base_sum_norm))
+```
+
+
+```{r write_pretreat_peGAR}
+write_csv(pe_gar_qual_spec,"data/pe_gar_qual_spec.csv")
+```
+
+1.1) Test with select wavenuber:
+1) Range 1 = 800 - 1300
+2) Range 2 = 1650 - 2100
+3) Range 3 = 3100 - 3700
+
+```{r selectedwlPE}
+t=as.data.frame(t(pe_gar_mat_base_sum_norm))
+t$wl = rownames(t)
+
+pe_mat_selectwl <- t %>%
+  filter( wl > 800 & wl < 1300 | wl > 1650 & wl < 2100 | wl > 3100 & wl < 3700 )
+
+pe_mat_selectwl = t(pe_mat_selectwl[,-72]) # 1229 obs of 72 variables
+
+pe_gar_qual_spec_selectwl <- bind_cols(pe_gar_qual2, as.data.frame(pe_mat_selectwl))
+```
+
+
+```{r write_selectedwlPE}
+write_csv(pe_gar_qual_spec_selectwl,"data/pe_gar_qual_spec_selectwl.csv")
+
+#pe_gar_selectwl = inner_join (pe_gar_qual_gar2, pe_df_selectwl, by="ID_particle")
+#pe_gar_spec_selectwl = pe_gar_selectwl[,-(1:32)]
+#pe_gar_qual_selectwl = pe_gar_selectwl[,(1:32)]
+
+#wl <- colnames(pe_df_selectwl)
+```
+
