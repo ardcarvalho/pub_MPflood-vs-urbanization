@@ -29,32 +29,45 @@ Sys.setlocale("LC_ALL", "English")
 River discharge (daily average, m^3^.s^-1^) in 2018 in the Garonne river (Portet-sur-Garonne, Muret) zoomed at the four sampling events, A1 to A4, at the top right. Data obtained from HydroFrance.
 
 ```{r debitcruea, echo=FALSE, warning=FALSE, message=FALSE}
-Debitott=read_xlsx("rawdata/Data_debit_2018_2019.xlsx", col_types = c("date", "numeric", "numeric", "numeric", "numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric"))
-Debitott <- Debitott %>% mutate (Date=as.Date.character(Date))
-Debitota<- Debitott[c(2:366),] # 2018 year
+Debitott=read_xlsx("rawdata/Data_debit_2018_2019.xlsx", 
+                   col_types = c("date", "numeric", "numeric", "numeric", "numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric"))
+Debitott <- Debitott %>% 
+  mutate(Date = as.Date(Date, "%Y/%m/%d", tz="UTC"))
+
+Debitota<- Debitott[c(2:366),] # 2018 year, daily average
 Sys.setenv("LANGUAGE"="En")
 #Sys.setlocale("LC_ALL", "English")
-Debit=read_xlsx("rawdata/Debit_crue_2018_QTVAR.xlsx", col_types = c("date", "numeric", "date", "numeric"))
-Debit2=read_xlsx("rawdata/Debit_crue_2019_QTVAR.xlsx")
-Debit2 <- Debit2 %>%
-  mutate(GSG = as.numeric(GSG)) 
+
+Debit = read_xlsx("rawdata/Debit_crue_2018_QTVAR.xlsx", 
+                  col_types = c("date", "numeric", "date", "numeric"))
 DebitMUG <-Debit[1:190,]
 DebitGSG <-Debit[1:132,]
+
+class(Debitota$Date)
+Debitota[286,1]
 
 ggmugtota <- ggplot(Debitota, aes(x=Date, y=MUG))+
   geom_line () +
   ggtitle("") +
-  ylab(expression(paste("River discharge ", "(",m^{3}/s, ")")))+
+  ylab(expression(paste("River discharge ", " (",m^{3}," .", s^{-1}, ")")))+
   xlab("Date")+
   theme_classic() +
-  geom_point(data=Debitota[286, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
-  geom_point(data=Debitota[288, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
-  geom_point(data=Debitota[292, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
-  geom_point(data=Debitota[298, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)
+  geom_rect(aes(ymin = 0, 
+                ymax = 200, 
+                xmin = as.Date("2018-10-7", "%Y-%m-%d"), 
+                xmax = as.Date("2018-10-28", "%Y-%m-%d")),
+            fill = NA, 
+            colour = "red")
+  # geom_point(data=Debitota[286, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
+  # geom_point(data=Debitota[288, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
+  # geom_point(data=Debitota[292, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
+  # geom_point(data=Debitota[298, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)
+ggmugtota
 
+# The zoomed plot shows intra-day fluctuations
 ggmuga <- ggplot(DebitMUG, aes(x=Date_MUG, y = MUG))+
   geom_line() + 
-  ylab(expression(paste("River discharge ", " (",m^{3}/s, ")")))+
+  ylab(expression(paste("River discharge ", " (",m^{3}," .", s^{-1}, ")")))+
   xlab("")+ 
   theme_classic(base_size = 10) + 
   geom_point(data=DebitMUG[56, ], aes(x=Date_MUG, y = MUG), shape=16, color="red", size=4, alpha=.6)+
@@ -65,25 +78,29 @@ ggmuga <- ggplot(DebitMUG, aes(x=Date_MUG, y = MUG))+
    geom_text(data=DebitMUG[117, ], aes(x=Date_MUG, y = MUG), y=116, color="black", size=4, label="A3")+
   geom_point(data=DebitMUG[134, ], aes(x=Date_MUG, y = MUG), shape=16, color="red", size=4, alpha=.6) +
     geom_text(data=DebitMUG[145, ], aes(x=Date_MUG, y = MUG), y=95, color="black", size=4, label="A4")+
-  scale_x_datetime(date_labels = "%d-%b-%y", date_breaks="9 days")
+  scale_x_datetime(date_labels = "%d-%b-%y", date_breaks="6 days")
+ggmuga
 
 ggmugtota +
   annotation_custom(
     ggplotGrob(ggmuga),
-    xmin= as.Date("2018-07-15"), xmax = as.Date("2018-12-30"), ymin=500, ymax=2000
+    xmin= as.Date("2018-07-20"), xmax = as.Date("2018-12-30"), ymin=400, ymax=1700
   )
 ```
 
 River discharge (daily average, m^3^.s^-1^) in 2019 in the Garonne river (Portet-sur-Garonne, Muret) zoomed at the six sampling events, B1 to B6, at the top righ. Data obtained from HydroFrance.
 
 ```{r debitcrueb, echo=FALSE, fig.cap="(ref:debitcrueb)", warning=FALSE, message=FALSE, out.width = "90%"}
-Debitot=read_xlsx("rawdata/Debit_2019.xlsx", col_types = c("date", "numeric", "numeric", "numeric", "numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric"))
+Debitot=read_xlsx("rawdata/Debit_2019.xlsx", 
+                  col_types = c("date", "numeric", "numeric", "numeric", "numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric"))
+
 Debitot2<- Debitot[c(91:213),] # from 1/04/2019 to 1/08/2019
 Debitot<-Debitot%>%
   mutate(Date=as.Date.character(Date))
 Debitot <- Debitot[,c(1,6,8,10)] # select only sites MUG, LAU and GSG
 
-Debitc=read_xlsx("rawdata/Debit_crue_2019_QTVAR.xlsx", col_types = c("date", "numeric", "date", "numeric", "date","numeric"))
+Debitc=read_xlsx("rawdata/Debit_crue_2019_QTVAR.xlsx",
+                 col_types = c("date", "numeric", "date", "numeric", "date","numeric"))
 Debitc<-Debitc%>%
   mutate(Date_MUG=as.Date.character(Date_MUG))%>%
     mutate(Date_GSG=as.Date.character(Date_GSG)) %>%
@@ -92,21 +109,29 @@ Debitc<-Debitc%>%
 ggmugtotc <- ggplot(Debitot,aes(Date,MUG))+
   geom_line () +
   ggtitle("") +
-  ylab(expression(paste("River discharge ", " (",m^{3}/s, ")")))+
+  ylab(expression(paste("River discharge ", " (",m^{3}," .", s^{-1}, ")")))+
   xlab("Date")+
   theme_classic()+
-  geom_point(data=Debitot[114, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
-  geom_point(data=Debitot[127, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
-  geom_point(data=Debitot[143, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
-  geom_point(data=Debitot[157, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
-  geom_point(data=Debitot[170, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
-  geom_point(data=Debitot[183, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
+  geom_rect(aes(ymin = 0, 
+                ymax = 800, 
+                xmin = as.Date("2019-04-23", "%Y-%m-%d"), 
+                xmax = as.Date("2019-07-5", "%Y-%m-%d")),
+            fill = NA, 
+            colour = "red")+
+  # geom_point(data=Debitot[114, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
+  # geom_point(data=Debitot[127, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
+  # geom_point(data=Debitot[143, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
+  # geom_point(data=Debitot[157, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
+  # geom_point(data=Debitot[170, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
+  # geom_point(data=Debitot[183, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
   scale_y_continuous(limits=c(0,2100))+
   scale_x_date(date_labels = "%b-%d-%y")
+ggmugtotc
+
 
 ggmugc <- ggplot(Debitc, aes(x=Date_MUG, y=MUG))+ 
   geom_line() +
-  ylab(expression(paste("River discharge", " (",m^{3}/s, ")")))+
+  ylab(expression(paste("River discharge ", " (",m^{3}," .", s^{-1}, ")")))+
   xlab("")+ 
   theme_classic(base_size = 10) + 
   geom_point(data=Debitc[77, ], aes(x=Date_MUG, y = MUG), shape=16, color="red", size=4, alpha=.6)+
@@ -126,7 +151,7 @@ ggmugc <- ggplot(Debitc, aes(x=Date_MUG, y=MUG))+
 ggmugtotc +
   annotation_custom(
     ggplotGrob(ggmugc),
-    xmin= as.Date("2019-06-01"), xmax = as.Date("2019-11-15"), ymin=500, ymax=2400
+    xmin= as.Date("2019-07-08"), xmax = as.Date("2019-11-30"), ymin=500, ymax=2100
   )
 ```
 
@@ -136,21 +161,29 @@ River discharge (daily average, m^3^.s^-1^)  in 2019 in the tributary Hers (LAU 
 gglautotc <- ggplot(Debitot,aes(Date,LAU))+
   geom_line () +
   ggtitle("") +
-  ylab(expression(paste("Water discharge ", " (",m^{-3}/s, ")")))+
+  ylab(expression(paste("River discharge ", " (",m^{3}," .", s^{-1}, ")")))+
   xlab("Date")+
   theme_classic()+
-  geom_point(data=Debitot[114, ], aes(x=Date, y = LAU), shape=16, color="red", size=2, alpha=.8)+
-  geom_point(data=Debitot[127, ], aes(x=Date, y = LAU), shape=16, color="red", size=2, alpha=.8)+
-  geom_point(data=Debitot[143, ], aes(x=Date, y = LAU), shape=16, color="red", size=2, alpha=.8)+
-  geom_point(data=Debitot[157, ], aes(x=Date, y = LAU), shape=16, color="red", size=2, alpha=.8)+
-  geom_point(data=Debitot[170, ], aes(x=Date, y = LAU), shape=16, color="red", size=2, alpha=.8)+
-  geom_point(data=Debitot[183, ], aes(x=Date, y = LAU), shape=16, color="red", size=2, alpha=.8)+
+  geom_rect(aes(ymin = 0, 
+                ymax = 10, 
+                xmin = as.Date("2019-04-23", "%Y-%m-%d"), 
+                xmax = as.Date("2019-07-5", "%Y-%m-%d")),
+            fill = NA, 
+            colour = "red")+
+  # geom_point(data=Debitot[114, ], aes(x=Date, y = LAU), shape=16, color="red", size=2, alpha=.8)+
+  # geom_point(data=Debitot[127, ], aes(x=Date, y = LAU), shape=16, color="red", size=2, alpha=.8)+
+  # geom_point(data=Debitot[143, ], aes(x=Date, y = LAU), shape=16, color="red", size=2, alpha=.8)+
+  # geom_point(data=Debitot[157, ], aes(x=Date, y = LAU), shape=16, color="red", size=2, alpha=.8)+
+  # geom_point(data=Debitot[170, ], aes(x=Date, y = LAU), shape=16, color="red", size=2, alpha=.8)+
+  # geom_point(data=Debitot[183, ], aes(x=Date, y = LAU), shape=16, color="red", size=2, alpha=.8)+
   scale_y_continuous(limits=c(0,65))+
   scale_x_date(date_labels = "%b-%d-%y", date_breaks="16 weeks")
+gglautotc
+
 
 gglauc <- ggplot(Debitc, aes(x=Date_LAU, y=LAU))+ 
   geom_line() +  
-  ylab(expression(paste("Water discharge ", " (",m^{3}/s, ")")))+
+  ylab(expression(paste("River discharge ", " (",m^{3}," .", s^{-1}, ")")))+
   xlab("")+ 
   theme_classic(base_size = 10) + 
   geom_point(data=Debitc[148, ], aes(x=Date_LAU, y=LAU), shape=16, color="red", size=4, alpha=.6)+
@@ -170,7 +203,7 @@ gglauc <- ggplot(Debitc, aes(x=Date_LAU, y=LAU))+
 gglautotc +
   annotation_custom(
     ggplotGrob(gglauc),
-    xmin= as.Date("2019-06-01"), xmax = as.Date("2019-11-25"), ymin=20, ymax=75
+    xmin= as.Date("2019-06-01"), xmax = as.Date("2019-11-25"), ymin=20, ymax=65
   )
 ```
 
@@ -615,33 +648,29 @@ fviz_pca_ind(pca_gar_ps_pareto, axes = c(1,2), geom = "point",pointsize = 2.5,
 lmp_samplingA_crue = read.csv("rawdata/lmp_samplingA_crue.csv", header = TRUE, row.names = 1) %>%
   clean_names()
 
-# mod=lmer(log(particles_m3_cor+1) ~ code_station*crue + 
-  #         (1|replicate), data=lmp_samplingA_crue)
+mod=lmer(particles_m3_cor ~ code_station*crue + (1|replicate), data=lmp_samplingA_crue)
+qqnorm(resid(mod))
+hist(resid(mod))
+Anova(mod, Type="III")
+emmeans(mod, pairwise ~ Season)
 
 lmp_samplingA_MUG <- lmp_samplingA_crue %>%
   filter(code_station == 6)
 lmp_samplingA_GSG <- lmp_samplingA_crue %>%
   filter(code_station == 11)
 
-mugconca <- ggplot(lmp_samplingA_MUG, aes(x = crue)) +
-  #geom_boxplot(aes(y = log(particles_m3_cor+1)), colour="#084594", fill = "#6baed6")+
-  geom_boxplot(aes(y = log(particles_m3_cor+1)), colour="#8c510a", fill = "#d8b365")+
-  #geom_boxplot(aes(y = log(particles_m3_cor+1)),fill= "gray")+
-  #geom_point(aes(y=`Debit (m3/s)`/coeff))+
-   xlab("")+
-  ylab(expression(paste("MP conc. (log) " , " (" , MP.m^{-3}, ")")))+
-  #scale_y_continuous(name="Conc", sec.axis= sec_axis(~.*coeff, name="Debit"))+
+mugconca <- ggplot(lmp_samplingA_MUG, aes(x = crue, y = particles_m3_cor)) +
+  geom_boxplot(colour="#8c510a", fill = "#d8b365")+
+  xlab("Sampling event")+
+  ylab(expression(paste("MP concentration" , " (" , MP.m^{-3}, ")")))+
   ggtitle("", subtitle = "MUG")+
   theme_classic(base_size = 14)
 
 mugconca
 
-gsgconca <-ggplot(lmp_samplingA_GSG, aes(x = crue, y = log(particles_m3_cor+1))) +
-  #geom_boxplot(colour="#005a32", fill = "#74c476")+
+gsgconca <-ggplot(lmp_samplingA_GSG, aes(x = crue, y = particles_m3_cor)) +
   geom_boxplot(colour="#01665e", fill = "#5ab4ac")+
-  #geom_boxplot(fill= "gray")+
-  xlab("")+
-  #ylab(expression(paste("Concentration (log)", " (", MP/m^{3} ,")")))+
+  xlab("Sampling event")+
   ylab("")+
   ggtitle("", subtitle = "GSG")+
   theme_classic(base_size = 14)
@@ -650,23 +679,24 @@ gsgconca
 ```
 
 ```{r crueAconcdebit, include=FALSE}
-mod=lmer(log(particles_m3_cor+1) ~ code_station*log(debit_m3_s) + (1|replicate), data=lmp_samplingA_crue)
+mod=lmer(particles_m3_cor ~ code_station*log(debit_m3_s) + (1|replicate), data=lmp_samplingA_crue)
 qqnorm(resid(mod))
 hist(resid(mod))
 Anova(mod)
 
 lmp_samplingA_crue$site <- factor(lmp_samplingA_crue$site, levels=c("MUG", "GSG"))
 
-gg18 = ggplot(lmp_samplingA_crue, aes(log(debit_m3_s),log(particles_m3_cor+1),colour=site, fill=site))+
+gg18 = ggplot(lmp_samplingA_crue, 
+              aes(log(debit_m3_s), particles_m3_cor, 
+                  colour=site, fill=site))+
   geom_jitter(size = 3, alpha = 0.85)+
   #facet_wrap(~Code_station, scales = "free_y")+
   geom_smooth(method="lm", se=T, linetype = "dotdash", size = 0.7) +
   ggtitle("")+
-  #scale_color_manual(name="Sampling site",values = c("#2171b5", "#238b45"))+
   scale_color_manual(name="Sampling site",values = c("#8c510a", "#01665e"))+
   scale_fill_manual(name="Sampling site", values = c("#f6e8c3", "#c7eae5"))+
-  xlab(expression(paste("River discharge (log)", " (",m^{3}/s, ")"))) +  
-  ylab(expression(paste("MP concentration (log) " , " (" , MP.m^{-3}, ")")))+
+  xlab(expression(paste("River discharge (log)", " (",m^{3}," .", s^{-1}, ")")))+ 
+  ylab(expression(paste("MP concentration " , " (" , MP.m^{-3}, ")")))+
   theme_classic(base_size = 16) +
   theme(legend.position = "none")
 
@@ -710,28 +740,39 @@ lmp_crue_lau = lmp_crue %>%
 lmp_crue_GAR = lmp_crue %>%
   filter(code_station !="LAU")
 
-mugconcb <-ggplot(lmp_crue_mug, aes(x = season_y, y = log(conc_nb_plastic_m3+1))) +
-  #geom_boxplot(colour="#084594", fill = "#6baed6")+
+names(lmp_crue_GAR)
+
+mod=lmer(conc_nb_plastic_m3 ~ code_station*season_y + (1|replica), data=lmp_crue_GAR)
+qqnorm(resid(mod))
+hist(resid(mod))
+Anova(mod)
+
+mugconcb <-ggplot(lmp_crue_mug, aes(x = season_y, y = conc_nb_plastic_m3)) +
   geom_boxplot(colour="#8c510a", fill = "#d8b365")+
-  #geom_boxplot(fill= "gray")+
   xlab("Sampling event")+
-  ylab(expression(paste("MP conc. (log) " , " (" , MP.m^{-3}, ")")))+
+  ylab(expression(paste("MP concentration " , " (" , MP.m^{-3}, ")")))+
   ggtitle("", subtitle="MUG")+
   theme_classic(base_size = 14)
 
 mugconcb
 
-gsgconcb <-ggplot(lmp_crue_gsg, aes(x = season_y, y = log(conc_nb_plastic_m3+1))) +
-  #geom_boxplot(colour="#005a32", fill = "#74c476")+
+gsgconcb <-ggplot(lmp_crue_gsg, aes(x = season_y, y = conc_nb_plastic_m3)) +
   geom_boxplot(colour="#01665e", fill = "#5ab4ac")+
-  #geom_boxplot(fill= "gray")+
   xlab("Sampling event")+
-  #ylab(expression(paste("Concentration (log)", " (", MP/m^{3} ,")")))+
   ylab("")+
   ggtitle("", subtitle="GSG")+
   theme_classic(base_size=14)
 
 gsgconcb
+
+lauconcb <-ggplot(lmp_crue_lau, aes(x = season_y, y = conc_nb_plastic_m3)) +
+  geom_boxplot(fill= "gray")+
+  xlab("Sampling event")+
+  ylab("")+
+  ggtitle("", subtitle="LAU")+
+  theme_classic(base_size=14)
+
+lauconcb
 ```
 
 ```{r crueB_GSG_stats, include=FALSE}
@@ -783,36 +824,52 @@ mean_mp_flood sd_mp_flood mean_mass_mp_flood
 ```{r crueBconcdebit, include=FALSE}
 lmp_crue_GAR$code_station <- factor(lmp_crue_GAR$code_station, levels=c("MUG", "GSG"))
 
-mod=lmer(log(conc_nb_plastic_m3+1) ~ code_station*log(debit_m3_s) + (1|replica), data=lmp_crue_GAR) # MUG & GSG
+mod=lmer(conc_nb_plastic_m3 ~ code_station*log(debit_m3_s) + 
+           (1|replica), data=lmp_crue_GAR) # MUG & GSG
 qqnorm(resid(mod))
 hist(resid(mod))
 Anova(mod)
 
-gg19 = ggplot(lmp_crue_GAR, aes(log(debit_m3_s),log(conc_nb_plastic_m3+1), colour=code_station, fill = code_station))+ # MUG & GSG / Debit
+
+gg19 = ggplot(lmp_crue_GAR, 
+              aes(log(debit_m3_s),conc_nb_plastic_m3, 
+                  colour=code_station, fill = code_station))+ # MUG & GSG / Debit
   geom_jitter(size = 3, alpha = 0.85)+
   #facet_wrap(~Code_station, scales = "free")+
   geom_smooth(method="lm", se=T, linetype = "dotdash", size = 0.7) +
-  #scale_color_manual(name="Sampling site",values = c("#2171b5", "#238b45"))+
   scale_color_manual(name="Sampling site", values = c("#8c510a", "#01665e"))+
   scale_fill_manual(name="Sampling site", values = c("#f6e8c3", "#c7eae5"))+
-  xlab(expression(paste("River discharge (log)", " (",m^{3}/s, ")"))) +  
-  ylab(expression(paste("MP concentration (log) " , " (" , MP.m^{-3}, ")")))+
+  xlab(expression(paste("River discharge (log) ", " (",m^{3}," .", s^{-1}, ")")))+  
+  ylab(expression(paste("MP concentration " , " (" , MP.m^{-3}, ")")))+
   theme_classic(base_size = 16)+
-  #theme(legend.position = "none")+
   ggtitle("")
-  #scale_x_continuous(breaks=waiver(), expand=c(0.075,0))
-  #scale_y_continuous(
-  #labels = scales::number_format(accuracy = 0.01,
-                                 #decimal.mark = '.'))
 
 gg19
+
+
+mod=lm(conc_nb_plastic_m3 ~ log(debit_m3_s+1) + (1|replica), data=lmp_crue_lau) # LAU
+qqnorm(resid(mod))
+hist(resid(mod))
+Anova(mod)
+
+gglau19 = ggplot(lmp_crue_lau, 
+              aes(log(debit_m3_s+1),conc_nb_plastic_m3))+ # LAU / Debit
+  geom_jitter(size = 3, alpha = 0.85)+
+  #facet_wrap(~Code_station, scales = "free")+
+  #geom_smooth(method="lm", se=T, linetype = "dotdash", size = 0.7) +
+  xlab(expression(paste("River discharge (log) ", " (",m^{3}," .", s^{-1}, ")")))+  
+  ylab(expression(paste("MP concentration " , " (" , MP.m^{-3}, ")")))+
+  theme_classic(base_size = 16)+
+  ggtitle("")
+
+gglau19
 ```
 
 Microplastic concentration (log-transformed, MP.m^-3^) during sampling events in the sites MUG and GSG in (a) flood A and (b) flood B.
 
 ```{r crueABconcevents, echo=FALSE, message=FALSE, warning=FALSE}
 ggarrange(ggarrange(mugconca, gsgconca, ncol = 2, labels = c("(a)", "")),   # First row with Flood A plots
-          ggarrange(mugconcb, gsgconcb, ncol = 2, labels = c("(b)", "", "")), # Second row with Flood B plots
+          ggarrange(mugconcb, gsgconcb, lauconcb, ncol = 3, labels = c("(b)", "", "")), # Second row with Flood B plots
           nrow = 2, 
           labels = "",
           font.label = list(size = 10)) 
