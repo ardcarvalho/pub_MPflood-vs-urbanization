@@ -434,13 +434,13 @@ readir = function(){
 #### Organize dataset
 
 ```{r read_specpe}
-#setwd("rawdata/PE")
-#pe_db = std_filename()
+setwd("rawdata/PE")
+pe_db = std_filename()
 ```
 
 ```{r write_specpe}
 #setwd("")
-#write_csv(pe_db, file="rawdata/pe_db.csv")
+#write_csv(pe_db, file="pe_db.csv")
 pe_db=read_csv(file="data/pe_db.csv")
 ```
 
