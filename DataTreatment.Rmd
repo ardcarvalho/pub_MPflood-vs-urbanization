@@ -46,18 +46,19 @@ DebitGSG <-Debit[1:132,]
 class(Debitota$Date)
 Debitota[286,1]
 
-ggmugtota <- ggplot(Debitota, aes(x=Date, y=MUG))+
+ggmugtota <- ggplot(Debitota, aes(x=as.Date(Date), y=MUG))+
   geom_line () +
-  ggtitle("") +
-  ylab(expression(paste("River discharge ", " (",m^{3}," .", s^{-1}, ")")))+
+  ggtitle("MUG") +
+  ylab(expression(paste("River discharge ", " (",m^{3}, s^{-1}, ")")))+
   xlab("Date")+
-  theme_classic() +
+  theme_classic(base_size = 14) +
   geom_rect(aes(ymin = 0, 
                 ymax = 200, 
                 xmin = as.Date("2018-10-7", "%Y-%m-%d"), 
                 xmax = as.Date("2018-10-28", "%Y-%m-%d")),
             fill = NA, 
-            colour = "red")
+            colour = "red")+
+  scale_x_date(date_labels = "%d-%b-%Y")
   # geom_point(data=Debitota[286, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
   # geom_point(data=Debitota[288, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
   # geom_point(data=Debitota[292, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
@@ -67,7 +68,7 @@ ggmugtota
 # The zoomed plot shows intra-day fluctuations
 ggmuga <- ggplot(DebitMUG, aes(x=Date_MUG, y = MUG))+
   geom_line() + 
-  ylab(expression(paste("River discharge ", " (",m^{3}," .", s^{-1}, ")")))+
+  ylab(expression(paste("Discharge ", " (",m^{3}, s^{-1}, ")")))+
   xlab("")+ 
   theme_classic(base_size = 10) + 
   geom_point(data=DebitMUG[56, ], aes(x=Date_MUG, y = MUG), shape=16, color="red", size=4, alpha=.6)+
@@ -81,10 +82,48 @@ ggmuga <- ggplot(DebitMUG, aes(x=Date_MUG, y = MUG))+
   scale_x_datetime(date_labels = "%d-%b-%y", date_breaks="6 days")
 ggmuga
 
-ggmugtota +
+debitmuga <- ggmugtota +
   annotation_custom(
     ggplotGrob(ggmuga),
     xmin= as.Date("2018-07-20"), xmax = as.Date("2018-12-30"), ymin=400, ymax=1700
+  )
+debitmuga
+
+gggsgtota <- ggplot(Debitota, aes(x=Date, y=GSG))+
+  geom_line () +
+  ggtitle("GSG") +
+  ylab(expression(paste("River discharge ", " (",m^{3}, s^{-1}, ")")))+
+  xlab("Date")+
+  theme_classic(base_size = 14) +
+  geom_rect(aes(ymin = 0, 
+                ymax = 275, 
+                xmin = as.Date("2018-10-7", "%Y-%m-%d"), 
+                xmax = as.Date("2018-10-28", "%Y-%m-%d")),
+            fill = NA, 
+            colour = "red")+
+  scale_x_date(date_labels = "%d-%b-%Y")
+
+gggsgtota
+
+gggsga <- ggplot(DebitGSG, aes(x=Date_GSG, y=GSG))+
+  geom_line() +
+  ylab(expression(paste("Discharge ", " (",m^{3}, s^{-1}, ")")))+
+  xlab("")+
+  theme_classic(base_size = 10) +
+  geom_point(data=DebitGSG[39, ], aes(x=Date_GSG, y=GSG), shape=16, color="red", size=4, alpha=.6)+
+  geom_text(data=DebitMUG[25, ], aes(x=Date_GSG, y = GSG), y=100, color="black", size=4, label="A1")+
+    geom_point(data=DebitGSG[50, ], aes(x=Date_GSG, y=GSG), shape=16, color="red", size=4, alpha=.6)+
+  geom_text(data=DebitGSG[53, ]+75, aes(x=Date_GSG, y=GSG, label="A2"),hjust=0, vjust=0, size=4, color="black")+
+    geom_point(data=DebitGSG[67, ], aes(x=Date_GSG, y=GSG), shape=16, color="red", size=4, alpha=.6)+
+  geom_text(data=DebitGSG[68, ]+13, aes(x=Date_GSG, y=GSG, label="A3"),hjust=0, vjust=0, size=4, color="black")+
+    geom_point(data=DebitGSG[93, ], aes(x=Date_GSG, y=GSG), shape=16, color="red", size=4, alpha=.6) + 
+  geom_text(data=DebitGSG[95, ]+16, aes(x=Date_GSG, y=GSG, label="A4"),hjust=0, vjust=0, size=4, color="black")+
+  scale_x_datetime(date_labels = "%d-%b-%y", date_breaks="6 days")
+
+debitgsga <- gggsgtota +
+  annotation_custom(
+    ggplotGrob(gggsga),
+    xmin= as.Date("2018-07-15"), xmax = as.Date("2018-12-30"), ymin=700, ymax=2800
   )
 ```
 
@@ -109,7 +148,7 @@ Debitc<-Debitc%>%
 ggmugtotc <- ggplot(Debitot,aes(Date,MUG))+
   geom_line () +
   ggtitle("") +
-  ylab(expression(paste("River discharge ", " (",m^{3}," .", s^{-1}, ")")))+
+  ylab(expression(paste("River discharge ", " (",m^{3}, s^{-1}, ")")))+
   xlab("Date")+
   theme_classic()+
   geom_rect(aes(ymin = 0, 
@@ -125,13 +164,13 @@ ggmugtotc <- ggplot(Debitot,aes(Date,MUG))+
   # geom_point(data=Debitot[170, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
   # geom_point(data=Debitot[183, ], aes(x=Date, y = MUG), shape=16, color="red", size=2, alpha=.8)+
   scale_y_continuous(limits=c(0,2100))+
-  scale_x_date(date_labels = "%b-%d-%y")
+  scale_x_date(date_labels = "%d-%b-%y")
 ggmugtotc
 
 
 ggmugc <- ggplot(Debitc, aes(x=Date_MUG, y=MUG))+ 
   geom_line() +
-  ylab(expression(paste("River discharge ", " (",m^{3}," .", s^{-1}, ")")))+
+  ylab(expression(paste("Discharge ", " (",m^{3}, s^{-1}, ")")))+
   xlab("")+ 
   theme_classic(base_size = 10) + 
   geom_point(data=Debitc[77, ], aes(x=Date_MUG, y = MUG), shape=16, color="red", size=4, alpha=.6)+
@@ -148,7 +187,7 @@ ggmugc <- ggplot(Debitc, aes(x=Date_MUG, y=MUG))+
     geom_text(data=Debitc[820, ], aes(x=Date_MUG, y = MUG), y=210, color="black", size=4, label="B6")+
     scale_x_date(date_labels = "%d-%b-%y", date_breaks="40 days")
 
-ggmugtotc +
+debitmugc <- ggmugtotc +
   annotation_custom(
     ggplotGrob(ggmugc),
     xmin= as.Date("2019-07-08"), xmax = as.Date("2019-11-30"), ymin=500, ymax=2100
@@ -161,7 +200,7 @@ River discharge (daily average, m^3^.s^-1^)  in 2019 in the tributary Hers (LAU 
 gglautotc <- ggplot(Debitot,aes(Date,LAU))+
   geom_line () +
   ggtitle("") +
-  ylab(expression(paste("River discharge ", " (",m^{3}," .", s^{-1}, ")")))+
+  ylab(expression(paste("River discharge ", " (",m^{3}, s^{-1}, ")")))+
   xlab("Date")+
   theme_classic()+
   geom_rect(aes(ymin = 0, 
@@ -177,13 +216,13 @@ gglautotc <- ggplot(Debitot,aes(Date,LAU))+
   # geom_point(data=Debitot[170, ], aes(x=Date, y = LAU), shape=16, color="red", size=2, alpha=.8)+
   # geom_point(data=Debitot[183, ], aes(x=Date, y = LAU), shape=16, color="red", size=2, alpha=.8)+
   scale_y_continuous(limits=c(0,65))+
-  scale_x_date(date_labels = "%b-%d-%y", date_breaks="16 weeks")
+  scale_x_date(date_labels = "%d-%b-%y")
 gglautotc
 
 
 gglauc <- ggplot(Debitc, aes(x=Date_LAU, y=LAU))+ 
   geom_line() +  
-  ylab(expression(paste("River discharge ", " (",m^{3}," .", s^{-1}, ")")))+
+  ylab(expression(paste("Discharge ", " (",m^{3}, s^{-1}, ")")))+
   xlab("")+ 
   theme_classic(base_size = 10) + 
   geom_point(data=Debitc[148, ], aes(x=Date_LAU, y=LAU), shape=16, color="red", size=4, alpha=.6)+
@@ -200,12 +239,20 @@ gglauc <- ggplot(Debitc, aes(x=Date_LAU, y=LAU))+
   geom_text(data=Debitc[1530, ], aes(x=Date_LAU, y=LAU, label="B6"),hjust=0, vjust=-1.3, size=4, color="black")+
   scale_x_date(date_labels = "%d-%b-%y", date_breaks="25 days")
 
-gglautotc +
+debitlauc <- gglautotc +
   annotation_custom(
     ggplotGrob(gglauc),
     xmin= as.Date("2019-06-01"), xmax = as.Date("2019-11-25"), ymin=20, ymax=65
   )
 ```
+
+```{r figdebit}
+ggarrange(debitmugc, debitlauc, nrow = 2, labels = c("(a)", "(b)"),
+          # common.legend = TRUE,
+          # legend="bottom",
+          font.label = list(size = 12))
+```
+
 
 # 2.5.2 Measurement of microplastics characteristics
 
@@ -652,30 +699,53 @@ mod=lmer(particles_m3_cor ~ code_station*crue + (1|replicate), data=lmp_sampling
 qqnorm(resid(mod))
 hist(resid(mod))
 Anova(mod, Type="III")
-emmeans(mod, pairwise ~ Season)
+emmeans(mod, pairwise ~ crue)
 
-lmp_samplingA_MUG <- lmp_samplingA_crue %>%
-  filter(code_station == 6)
-lmp_samplingA_GSG <- lmp_samplingA_crue %>%
-  filter(code_station == 11)
+# lmp_samplingA_MUG <- lmp_samplingA_crue %>%
+#   filter(code_station == 6)
+# lmp_samplingA_GSG <- lmp_samplingA_crue %>%
+#   filter(code_station == 11)
+# 
+# mugconca <- ggplot(lmp_samplingA_MUG, aes(x = crue, y = particles_m3_cor)) +
+#   geom_boxplot(colour="#8c510a", fill = "#d8b365")+
+#   xlab("Sampling event")+
+#   ylab(expression(paste("MP concentration" , " (" , MP.m^{-3}, ")")))+
+#   ggtitle("", subtitle = "MUG")+
+#   theme_classic(base_size = 14)
+# 
+# mugconca
+# 
+# gsgconca <-ggplot(lmp_samplingA_GSG, aes(x = crue, y = particles_m3_cor)) +
+#   geom_boxplot(colour="#01665e", fill = "#5ab4ac")+
+#   xlab("Sampling event")+
+#   ylab("")+
+#   ggtitle("", subtitle = "GSG")+
+#   theme_classic(base_size = 14)
+# 
+# gsgconca
 
-mugconca <- ggplot(lmp_samplingA_MUG, aes(x = crue, y = particles_m3_cor)) +
-  geom_boxplot(colour="#8c510a", fill = "#d8b365")+
+
+lmp_samplingA_crue$site <- factor(lmp_samplingA_crue$site, levels=c("MUG", "GSG"))
+
+names(lmp_samplingA_crue)  
+crueconca <- ggplot(lmp_samplingA_crue, aes(x = crue, y = particles_m3)) + # not correcting for microplastic
+  geom_boxplot(fill = "grey90") +
+  facet_wrap(.~ site, scales = "free")+
   xlab("Sampling event")+
-  ylab(expression(paste("MP concentration" , " (" , MP.m^{-3}, ")")))+
-  ggtitle("", subtitle = "MUG")+
+  ylab(expression(paste("Particles ", m^{-3})))+
   theme_classic(base_size = 14)
 
-mugconca
+crueconca
+```
 
-gsgconca <-ggplot(lmp_samplingA_GSG, aes(x = crue, y = particles_m3_cor)) +
-  geom_boxplot(colour="#01665e", fill = "#5ab4ac")+
-  xlab("Sampling event")+
-  ylab("")+
-  ggtitle("", subtitle = "GSG")+
-  theme_classic(base_size = 14)
 
-gsgconca
+```{r figcruea, include=FALSE}
+ggarrange(ggarrange(debitmuga, debitgsga, ncol = 2, labels = c("(a)", "")),   # First row with Flood A plots
+          ggarrange(crueconca, ncol = 1, labels = c("(b)", "", "")), # Second row with Flood B plots
+          nrow = 2,
+          common.legend = TRUE,
+          labels = "",
+          font.label = list(size = 12)) 
 ```
 
 ```{r crueAconcdebit, include=FALSE}
@@ -686,21 +756,41 @@ Anova(mod)
 
 lmp_samplingA_crue$site <- factor(lmp_samplingA_crue$site, levels=c("MUG", "GSG"))
 
-gg18 = ggplot(lmp_samplingA_crue, 
-              aes(log(debit_m3_s), particles_m3_cor, 
-                  colour=site, fill=site))+
-  geom_jitter(size = 3, alpha = 0.85)+
-  #facet_wrap(~Code_station, scales = "free_y")+
-  geom_smooth(method="lm", se=T, linetype = "dotdash", size = 0.7) +
+# gg18 = ggplot(lmp_samplingA_crue, 
+#               aes(x = log(debit_m3_s), y = particles_m3_cor, 
+#                   colour=site, fill=site))+
+#   geom_jitter(size = 3, alpha = 0.85)+
+#   #facet_wrap(~Code_station, scales = "free_y")+
+#   geom_smooth(method="lm", se=T, linetype = "dotdash", size = 0.7) +
+#   ggtitle("")+
+#   scale_color_manual(name="Sampling site",values = c("#8c510a", "#01665e"))+
+#   scale_fill_manual(name="Sampling site", values = c("#f6e8c3", "#c7eae5"))+
+#   xlab(expression(paste("River discharge (log)", " (",m^{3}," .", s^{-1}, ")")))+ 
+#   ylab(expression(paste("MP concentration " , " (" , MP.m^{-3}, ")")))+
+#   theme_classic(base_size = 16) +
+#   theme(legend.position = "none")
+# 
+# gg18
+
+gg18 <- ggplot(lmp_samplingA_crue, 
+              aes(x = log(debit_m3_s), 
+                  y = particles_m3_cor,
+                  shape = site,
+                  fill = site))+
+  geom_point(size=3)+
+  geom_smooth(method="lm", se=F, aes(linetype = site), size = 0.7, colour = "black") +
   ggtitle("")+
-  scale_color_manual(name="Sampling site",values = c("#8c510a", "#01665e"))+
-  scale_fill_manual(name="Sampling site", values = c("#f6e8c3", "#c7eae5"))+
-  xlab(expression(paste("River discharge (log)", " (",m^{3}," .", s^{-1}, ")")))+ 
-  ylab(expression(paste("MP concentration " , " (" , MP.m^{-3}, ")")))+
-  theme_classic(base_size = 16) +
-  theme(legend.position = "none")
+  #scale_color_manual(name="Sampling site",values = c("#8c510a", "#01665e"))+
+  #scale_fill_manual(name="Sampling site", values = c("#f6e8c3", "#c7eae5"))+
+  xlab(expression(paste("River discharge (log)", " (",m^{3}, s^{-1}, ")")))+ 
+  ylab(expression(paste("MP concentration " , " (" , "MP ", m^{-3}, ")")))+
+  theme_classic(base_size = 14) +
+  theme(legend.position = "bottom") +
+  scale_x_continuous(breaks = c(4.25, 4.5, 4.75, 5, 5.25, 5.50))+
+  labs(shape = "Sampling site", linetype = "Sampling site", fill = "Sampling site")
 
 gg18
+
 ```
 
 ```{r crueA_MUG_stats}
@@ -747,32 +837,43 @@ qqnorm(resid(mod))
 hist(resid(mod))
 Anova(mod)
 
-mugconcb <-ggplot(lmp_crue_mug, aes(x = season_y, y = conc_nb_plastic_m3)) +
-  geom_boxplot(colour="#8c510a", fill = "#d8b365")+
+# mugconcb <-ggplot(lmp_crue_mug, aes(x = season_y, y = conc_nb_plastic_m3)) +
+#   geom_boxplot(colour="#8c510a", fill = "#d8b365")+
+#   xlab("Sampling event")+
+#   ylab(expression(paste("MP concentration " , " (" , MP.m^{-3}, ")")))+
+#   ggtitle("", subtitle="MUG")+
+#   theme_classic(base_size = 14)
+# 
+# mugconcb
+# 
+# gsgconcb <-ggplot(lmp_crue_gsg, aes(x = season_y, y = conc_nb_plastic_m3)) +
+#   geom_boxplot(colour="#01665e", fill = "#5ab4ac")+
+#   xlab("Sampling event")+
+#   ylab("")+
+#   ggtitle("", subtitle="GSG")+
+#   theme_classic(base_size=14)
+# 
+# gsgconcb
+# 
+# lauconcb <-ggplot(lmp_crue_lau, aes(x = season_y, y = conc_nb_plastic_m3)) +
+#   geom_boxplot(fill= "gray")+
+#   xlab("Sampling event")+
+#   ylab("")+
+#   ggtitle("", subtitle="LAU")+
+#   theme_classic(base_size=14)
+# 
+# lauconcb
+
+lmp_crue$code_station <- factor(lmp_crue$code_station, levels=c("MUG", "GSG", "LAU"))
+
+crueconcb <- ggplot(lmp_crue, aes(x = season_y, y = conc_nb_plastic_m3)) +
+  geom_boxplot(fill = "grey90") +
+  facet_wrap(.~ code_station, scales = "free")+
   xlab("Sampling event")+
-  ylab(expression(paste("MP concentration " , " (" , MP.m^{-3}, ")")))+
-  ggtitle("", subtitle="MUG")+
+  ylab(expression(paste("MP concentration" , " (" , "MP ", m^{-3}, ")")))+
   theme_classic(base_size = 14)
 
-mugconcb
-
-gsgconcb <-ggplot(lmp_crue_gsg, aes(x = season_y, y = conc_nb_plastic_m3)) +
-  geom_boxplot(colour="#01665e", fill = "#5ab4ac")+
-  xlab("Sampling event")+
-  ylab("")+
-  ggtitle("", subtitle="GSG")+
-  theme_classic(base_size=14)
-
-gsgconcb
-
-lauconcb <-ggplot(lmp_crue_lau, aes(x = season_y, y = conc_nb_plastic_m3)) +
-  geom_boxplot(fill= "gray")+
-  xlab("Sampling event")+
-  ylab("")+
-  ggtitle("", subtitle="LAU")+
-  theme_classic(base_size=14)
-
-lauconcb
+crueconcb
 ```
 
 ```{r crueB_GSG_stats, include=FALSE}
@@ -831,53 +932,72 @@ hist(resid(mod))
 Anova(mod)
 
 
-gg19 = ggplot(lmp_crue_GAR, 
-              aes(log(debit_m3_s),conc_nb_plastic_m3, 
-                  colour=code_station, fill = code_station))+ # MUG & GSG / Debit
-  geom_jitter(size = 3, alpha = 0.85)+
-  #facet_wrap(~Code_station, scales = "free")+
-  geom_smooth(method="lm", se=T, linetype = "dotdash", size = 0.7) +
-  scale_color_manual(name="Sampling site", values = c("#8c510a", "#01665e"))+
-  scale_fill_manual(name="Sampling site", values = c("#f6e8c3", "#c7eae5"))+
-  xlab(expression(paste("River discharge (log) ", " (",m^{3}," .", s^{-1}, ")")))+  
-  ylab(expression(paste("MP concentration " , " (" , MP.m^{-3}, ")")))+
-  theme_classic(base_size = 16)+
-  ggtitle("")
+# gg19 = ggplot(lmp_crue_GAR, 
+#               aes(log(debit_m3_s),conc_nb_plastic_m3, 
+#                   colour=code_station, fill = code_station))+ # MUG & GSG / Debit
+#   geom_jitter(size = 3, alpha = 0.85)+
+#   #facet_wrap(~Code_station, scales = "free")+
+#   geom_smooth(method="lm", se=T, linetype = "dotdash", size = 0.7) +
+#   scale_color_manual(name="Sampling site", values = c("#8c510a", "#01665e"))+
+#   scale_fill_manual(name="Sampling site", values = c("#f6e8c3", "#c7eae5"))+
+#   xlab(expression(paste("River discharge (log) ", " (",m^{3}," .", s^{-1}, ")")))+  
+#   ylab(expression(paste("MP concentration " , " (" , MP.m^{-3}, ")")))+
+#   theme_classic(base_size = 16)+
+#   ggtitle("")
+# 
+# gg19
+
+lmp_crue_GAR$code_station <- factor(lmp_crue_GAR$code_station, levels=c("MUG", "GSG"))
+
+gg19 <- ggplot(lmp_crue_GAR, 
+              aes(x = log(debit_m3_s), 
+                  y = conc_nb_plastic_m3,
+                  shape = code_station,
+                  fill = code_station))+
+  geom_point(size=3)+
+  geom_smooth(method="lm", se=F, aes(linetype = code_station), size = 0.7, colour = "black") +
+  ggtitle("")+
+  #scale_color_manual(name="Sampling site",values = c("#8c510a", "#01665e"))+
+  #scale_fill_manual(name="Sampling site", values = c("#f6e8c3", "#c7eae5"))+
+  xlab(expression(paste("River discharge (log)", " (",m^{3}, s^{-1}, ")")))+ 
+  ylab(expression(paste("MP concentration " , " (" , "MP ", m^{-3}, ")")))+
+  theme_classic(base_size = 14) +
+  theme(legend.position = "bottom") +
+  labs(shape = "Sampling site", linetype = "Sampling site", fill = "Sampling site")
 
 gg19
-
 
 mod=lm(conc_nb_plastic_m3 ~ log(debit_m3_s+1) + (1|replica), data=lmp_crue_lau) # LAU
 qqnorm(resid(mod))
 hist(resid(mod))
-Anova(mod)
+Anova(mod) # non significant
 
 gglau19 = ggplot(lmp_crue_lau, 
-              aes(log(debit_m3_s+1),conc_nb_plastic_m3))+ # LAU / Debit
-  geom_jitter(size = 3, alpha = 0.85)+
-  #facet_wrap(~Code_station, scales = "free")+
-  #geom_smooth(method="lm", se=T, linetype = "dotdash", size = 0.7) +
-  xlab(expression(paste("River discharge (log) ", " (",m^{3}," .", s^{-1}, ")")))+  
-  ylab(expression(paste("MP concentration " , " (" , MP.m^{-3}, ")")))+
-  theme_classic(base_size = 16)+
-  ggtitle("")
+              aes(log(debit_m3_s+1), conc_nb_plastic_m3))+ # LAU / Debit
+  geom_point(size=3)+
+  #facet_wrap(.~ code_station, scales = "free")+
+  #geom_smooth(method="lm", se=F, linetype = "solid", size = 0.7, colour = "black") +
+  xlab(expression(paste("River discharge (log) ", " (",m^{3}, s^{-1}, ")")))+  
+  ylab(expression(paste("MP concentration " , " (" , "MP ", m^{-3}, ")")))+
+  theme_classic(base_size = 14)
 
 gglau19
 ```
 
-Microplastic concentration (log-transformed, MP.m^-3^) during sampling events in the sites MUG and GSG in (a) flood A and (b) flood B.
+Microplastic concentration (MP.m^-3^) during sampling events in the sites MUG and GSG in (a) flood A and (b) flood B.
 
-```{r crueABconcevents, echo=FALSE, message=FALSE, warning=FALSE}
-ggarrange(ggarrange(mugconca, gsgconca, ncol = 2, labels = c("(a)", "")),   # First row with Flood A plots
-          ggarrange(mugconcb, gsgconcb, lauconcb, ncol = 3, labels = c("(b)", "", "")), # Second row with Flood B plots
-          nrow = 2, 
+```{r figconcab, echo=FALSE, message=FALSE, warning=FALSE}
+ggarrange(ggarrange(crueconca, ncol = 1, labels = c("(a)", "")),   # First row with Flood A plots
+          ggarrange(crueconcb, ncol = 1, labels = c("(b)", "", "")), # Second row with Flood B plots
+          nrow = 2,
+          common.legend = TRUE,
           labels = "",
-          font.label = list(size = 10)) 
+          font.label = list(size = 12)) 
 ```
 
-Relationship between microplastic concentration and river discharge (log-transformed, MP.m^-3^ and m^3^.s^-1^, respectively) in the sites MUG (displayed in blue) and GSG (in green) for (a) flood A and (b) flood B.
+Relationship between microplastic concentration (MP.m^-3^) and river discharge (log-transformed, m^3^.s^-1^) in the sites MUG (displayed in blue) and GSG (in green) for (a) flood A and (b) flood B.
 
-```{r crueABconcdebit, echo=FALSE, message=FALSE, warning=FALSE}
+```{r figconcabdebit, echo=FALSE, message=FALSE, warning=FALSE}
 ggarrange(gg18, gg19, ncol = 2, labels = c("(a)", "(b)"),
           common.legend = TRUE,
           legend="bottom",
@@ -909,10 +1029,18 @@ qqnorm(resid(mod))
 hist(resid(mod))
 Anova(mod) # 0.036
 
+# hist(lmp_crue_qual_gar_famd_mug$fa1)
+# kruskal.test(lmp_crue_qual_gar_famd_mug$fa1, lmp_crue_qual_gar_famd_mug$flood) 
+# Kruskal-Wallis chi-squared = 3.1935, df = 1, p-value = 0.07393
+
 mod=lmer(fa1 ~ flood + (1|replica), data=lmp_crue_qual_gar_famd_gsg) # GSG
 qqnorm(resid(mod))
 hist(resid(mod))
 Anova(mod) # 0.032
+
+# hist(lmp_crue_qual_gar_famd_gsg$fa1)
+# kruskal.test(lmp_crue_qual_gar_famd_gsg$fa1, lmp_crue_qual_gar_famd_gsg$flood)
+# Kruskal-Wallis chi-squared = 4.6012, df = 1, p-value = 0.03195
 ```
 
 ```{r fa2events_mod, echo=FALSE, warning=FALSE, message=FALSE}
@@ -927,10 +1055,14 @@ qqnorm(resid(mod))
 hist(resid(mod))
 Anova(mod) # non-significant
 
+kruskal.test(lmp_crue_qual_gar_famd_mug$fa2, lmp_crue_qual_gar_famd_mug$flood) # non-significant
+
 mod=lmer(fa2 ~ flood + (1|replica), data=lmp_crue_qual_gar_famd_gsg) # GSG
 qqnorm(resid(mod))
 hist(resid(mod))
 Anova(mod) # non significant
+
+kruskal.test(lmp_crue_qual_gar_famd_gsg$fa2, lmp_crue_qual_gar_famd_gsg$flood) # non-significant
 ```
 
 ```{r fa3events_mod, echo=FALSE, warning=FALSE, message=FALSE}
@@ -945,10 +1077,14 @@ qqnorm(resid(mod))
 hist(resid(mod))
 Anova(mod) # non-significant
 
+kruskal.test(lmp_crue_qual_gar_famd_mug$fa3, lmp_crue_qual_gar_famd_mug$flood) # non-significant
+
 mod=lmer(fa3 ~ flood + (1|replica), data=lmp_crue_qual_gar_famd_gsg) # GSG
 qqnorm(resid(mod))
 hist(resid(mod))
 Anova(mod) # non significant
+
+kruskal.test(lmp_crue_qual_gar_famd_gsg$fa3, lmp_crue_qual_gar_famd_gsg$flood) # non-significant
 ```
 
 ```{r fa4events_mod, echo=FALSE, warning=FALSE, message=FALSE}
@@ -963,82 +1099,169 @@ qqnorm(resid(mod))
 hist(resid(mod))
 Anova(mod) # 0.674
 
+kruskal.test(lmp_crue_qual_gar_famd_mug$fa4, lmp_crue_qual_gar_famd_mug$flood) # non-significant
+
 mod=lmer(fa4 ~ flood + (1|replica), data=lmp_crue_qual_gar_famd_gsg) # GSG
 qqnorm(resid(mod))
 hist(resid(mod))
 Anova(mod) # 0.001
+
+kruskal.test(lmp_crue_qual_gar_famd_gsg$fa4, lmp_crue_qual_gar_famd_gsg$flood) 
+
+#Kruskal-Wallis chi-squared = 11.306, df = 1, p-value = 0.0007727
 ```
 
 ```{r fa1e4events_plot, echo=FALSE, warning=FALSE, message=FALSE}
-FA1flood <-ggplot(lmp_crue_qual_gar_famd_mug, aes(x = flood, y = fa1)) +
-  #geom_boxplot(color = "#084594", fill = "#6baed6")+
-  geom_boxplot(colour="#8c510a", fill = "#d8b365")+
-  #geom_boxplot(fill= "gray")+
-  xlab("")+
+# FA1flood <-ggplot(lmp_crue_qual_gar_famd_mug, aes(x = flood, y = fa1)) +
+#   #geom_boxplot(color = "#084594", fill = "#6baed6")+
+#   geom_boxplot(colour="#8c510a", fill = "#d8b365")+
+#   #geom_boxplot(fill= "gray")+
+#   xlab("")+
+#   ylab("MP dimension (PC1)")+
+#   ggtitle("", subtitle="MUG")+
+#   theme_classic(base_size=14)+
+#   #geom_segment(x = "Without", xend = "With", y=6.8, yend=6.8, lineend = "round") +
+#   #geom_text(data=lmp_crue_qual_gar_fam_mug,aes(x = "Without", y=5.9, label="p = 0.036"),vjust=0,hjust=-0.6) +
+#   coord_cartesian(clip = "off")+
+#   geom_bracket(
+#     xmin = "Without", xmax = "With", y.position = 6.8,
+#     label = "p = 0.036",
+#     size = 0.3,
+#     label.size = 3.88
+#             )
+
+FA1flood <- ggplot(lmp_crue_qual_gar_famd_mug, aes(x = flood, y = fa1)) +
+  geom_boxplot(fill = "grey90") +
+  facet_wrap(.~ code_station, scales = "free")+
   ylab("MP dimension (PC1)")+
-  ggtitle("", subtitle="MUG")+
-  theme_classic(base_size=14)+
-  #geom_segment(x = "Without", xend = "With", y=6.8, yend=6.8, lineend = "round") +
-  #geom_text(data=lmp_crue_qual_gar_fam_mug,aes(x = "Without", y=5.9, label="p = 0.036"),vjust=0,hjust=-0.6) +
-  coord_cartesian(clip = "off")+
+  xlab("")+
+  #scale_x_discrete(labels=xlabsmug)+
+  theme_classic(base_size = 14)+
+  theme(axis.title.x=element_blank())+
   geom_bracket(
-      xmin = "Without", xmax = "With", y.position = 6.8,
-          label = "p = 0.036"
-            )
+    xmin = "Without", xmax = "With", y.position = 6.6,
+    label = "p = 0.036",
+    size = 0.3,
+    label.size = 4)
+  
 FA1flood
 
-FA1floodgsg <-ggplot(lmp_crue_qual_gar_famd_gsg, aes(x = flood, y = fa1)) +
-  #geom_boxplot(color = "#005a32", fill = "#74c476")+
-  geom_boxplot(colour="#01665e", fill = "#5ab4ac")+
-  #geom_boxplot(fill= "gray")+
-  xlab("")+
+# FA1floodgsg <-ggplot(lmp_crue_qual_gar_famd_gsg, aes(x = flood, y = fa1)) +
+#   #geom_boxplot(color = "#005a32", fill = "#74c476")+
+#   geom_boxplot(colour="#01665e", fill = "#5ab4ac")+
+#   #geom_boxplot(fill= "gray")+
+#   xlab("")+
+#   ylab("")+
+#   ggtitle("", subtitle="GSG")+
+#   theme_classic(base_size=14)+
+#   #geom_segment(x = "Without", xend = "With", y=7.2, yend=7.2, lineend = "round") +
+#   #geom_text(data=lmp_crue_qual_gar_fam_mug,
+#    #         aes(x = "Without", y=6.3, label="p = 0.032"),
+#     #        vjust=0,hjust=-0.6)+
+#   coord_cartesian(clip = "off")+
+#   geom_bracket(
+#       xmin = "Without", xmax = "With", y.position = 7.2,
+#           label = "p = 0.032"
+#             )
+# FA1floodgsg
+
+FA1floodgsg <- ggplot(lmp_crue_qual_gar_famd_gsg, aes(x = flood, y = fa1)) +
+  geom_boxplot(fill = "grey90") +
+  facet_wrap(.~ code_station, scales = "free")+
   ylab("")+
-  ggtitle("", subtitle="GSG")+
-  theme_classic(base_size=14)+
-  #geom_segment(x = "Without", xend = "With", y=7.2, yend=7.2, lineend = "round") +
-  #geom_text(data=lmp_crue_qual_gar_fam_mug,
-   #         aes(x = "Without", y=6.3, label="p = 0.032"),
-    #        vjust=0,hjust=-0.6)+
-  coord_cartesian(clip = "off")+
+  xlab("")+
+  #scale_x_discrete(labels=xlabsgsg)+
+  theme_classic(base_size = 14)+
+  theme(axis.title.x=element_blank())+
   geom_bracket(
-      xmin = "Without", xmax = "With", y.position = 7.2,
-          label = "p = 0.032"
-            )
+    xmin = "Without", xmax = "With", y.position = 7,
+    label = "p = 0.032",
+    size = 0.3,
+    label.size = 4)
+
 FA1floodgsg
 
-FA4flood <-ggplot(lmp_crue_qual_gar_famd_mug, aes(x = flood, y = fa4)) +
-  #geom_boxplot(color = "#084594", fill = "#6baed6")+
-  geom_boxplot(colour="#8c510a", fill = "#d8b365")+
-  #geom_boxplot(fill= "gray")+
-  xlab("Flood")+
-  ylab("MP colour and composition (PC4)")+
-  ggtitle("", subtitle="MUG")+
-  theme_classic(base_size=14)
+# FA4flood <-ggplot(lmp_crue_qual_gar_famd_mug, aes(x = flood, y = fa4)) +
+#   #geom_boxplot(color = "#084594", fill = "#6baed6")+
+#   geom_boxplot(colour="#8c510a", fill = "#d8b365")+
+#   #geom_boxplot(fill= "gray")+
+#   xlab("Flood")+
+#   ylab("MP colour and composition (PC4)")+
+#   ggtitle("", subtitle="MUG")+
+#   theme_classic(base_size=14)
 
+xlabsmug <- paste(levels(lmp_crue_qual_gar_famd_mug$flood),"\n(n=",table(lmp_crue_qual_gar_famd_mug$flood),")",sep="")
+FA4flood <- ggplot(lmp_crue_qual_gar_famd_mug, aes(x = flood, y = fa4)) +
+  geom_boxplot(fill = "grey90") +
+  #facet_wrap(.~ code_station, scales = "free")+
+  ylab("MP colour and composition (PC4)")+
+  xlab("Flood")+
+  scale_x_discrete(labels=xlabsmug)+
+  theme_classic(base_size = 14)
+  
 FA4flood
 
-FA4floodgsg <-ggplot(lmp_crue_qual_gar_famd_gsg, aes(x = flood, y = fa4)) +
-  #geom_boxplot(color = "#005a32", fill = "#74c476")+
-  geom_boxplot(colour="#01665e", fill = "#5ab4ac")+
-  #geom_boxplot(fill= "gray")+
-  xlab("Flood")+
+
+# FA4floodgsg <-ggplot(lmp_crue_qual_gar_famd_gsg, aes(x = flood, y = fa4)) +
+#   #geom_boxplot(color = "#005a32", fill = "#74c476")+
+#   geom_boxplot(colour="#01665e", fill = "#5ab4ac")+
+#   #geom_boxplot(fill= "gray")+
+#   xlab("Flood")+
+#   ylab("")+
+#   ggtitle("", subtitle="GSG")+
+#   theme_classic(base_size=14)+
+#   #geom_segment(x = "Without", xend = "With", y=2.4, yend=2.4, lineend = "round") +
+#   #geom_text(data=lmp_crue_qual_gar_fam_mug,
+#    #         aes(x = "Without", y=1.8, label="p < 0.01"),
+#     #        vjust=0,hjust=-0.9,)+
+#    coord_cartesian(clip = "off")+
+#   geom_bracket(
+#       xmin = "Without", xmax = "With", y.position = 2.4,
+#           label = "p < 0.01"
+#             )
+
+
+xlabsgsg <- paste(levels(lmp_crue_qual_gar_famd_gsg$flood),"\n(n=",table(lmp_crue_qual_gar_famd_gsg$flood),")",sep="")
+FA4floodgsg <- ggplot(lmp_crue_qual_gar_famd_gsg, aes(x = flood, y = fa4)) +
+  geom_boxplot(fill = "grey90") +
+  #facet_wrap(.~ code_station, scales = "free")+
   ylab("")+
-  ggtitle("", subtitle="GSG")+
-  theme_classic(base_size=14)+
-  #geom_segment(x = "Without", xend = "With", y=2.4, yend=2.4, lineend = "round") +
-  #geom_text(data=lmp_crue_qual_gar_fam_mug,
-   #         aes(x = "Without", y=1.8, label="p < 0.01"),
-    #        vjust=0,hjust=-0.9,)+
-   coord_cartesian(clip = "off")+
+  xlab("Flood")+
+  scale_x_discrete(labels=xlabsgsg)+
+  theme_classic(base_size = 14)+
   geom_bracket(
-      xmin = "Without", xmax = "With", y.position = 2.4,
-          label = "p < 0.01"
-            )
-  
+    xmin = "Without", xmax = "With", y.position = 2.4,
+    label = "p < 0.01",
+    size = 0.3,
+    label.size = 4)
+
 FA4floodgsg
 
-ggarrange(ggarrange(FA1flood, FA1floodgsg, ncol = 2, labels = c("(a)", "")),  
-          ggarrange(FA4flood, FA4floodgsg, ncol = 2, labels = c("(b)", "", "")), 
+
+#lmp_crue_qual_gar_famd$code_station <- factor(lmp_crue_qual_gar_famd$code_station, levels=c("MUG", "GSG"))
+
+# ggplot(lmp_crue_qual_gar_famd, aes(x = flood, y = fa1)) +
+#   geom_boxplot(fill = "grey90") +
+#   facet_wrap(.~ code_station, scales = "free")+
+#   ylab("MP colour and composition (PC4)")+
+#   xlab("Flood")+
+#   scale_x_discrete(labels=xlabs)+
+#   theme_classic(base_size = 14)+
+#   stat_compare_means(label = "p.format", label.x = 1.5)
+# 
+# 
+# ggplot(lmp_crue_qual_gar_famd, aes(x = flood, y = fa4)) +
+#   geom_boxplot(fill = "grey90") +
+#   facet_wrap(.~ code_station, scales = "free")+
+#   ylab("")+
+#   xlab("Flood")+
+#   theme_classic(base_size = 14)+
+#   stat_compare_means(label = "p.format", label.x = 1.5)
+```
+
+```{r figfamdflood, echo=FALSE, warning=FALSE, message=FALSE}
+ggarrange(ggarrange(FA1flood, FA1floodgsg, ncol = 2, labels = c("(a)", "(b)")),  
+          ggarrange(FA4flood, FA4floodgsg, ncol = 2, labels = c(" ", "")), 
           nrow = 2, 
           labels = "",
           font.label = list(size = 12))
@@ -1133,6 +1356,55 @@ FA4_LAU <-ggplot(lmp_crue_qual_lau_famd, aes(x = sampling_event, y = fa3)) +
 #           label = "p = 0.036"
 #             )
 FA4_LAU
+
+lmp_crue_qual_lau_famd$sampling_event <- as.factor(lmp_crue_qual_lau_famd$sampling_event)
+xlabslau <- paste(levels(lmp_crue_qual_lau_famd$sampling_event),"\n(n=",table(lmp_crue_qual_lau_famd$sampling_event),")",sep="")
+
+FA1_lau <- ggplot(lmp_crue_qual_lau_famd, aes(x = sampling_event, y = fa1)) +
+  geom_boxplot(fill = "grey90") +
+  #facet_wrap(.~ code_station, scales = "free")+
+  ylab("MP dimension (PC1)")+
+  ggtitle("")+
+  theme_classic(base_size = 14)+
+  theme(axis.title.x=element_blank())+
+  stat_compare_means(method = "anova")
+FA1_lau
+
+FA2_lau <- ggplot(lmp_crue_qual_lau_famd, aes(x = sampling_event, y = fa2)) +
+  geom_boxplot(fill = "grey90") +
+  #facet_wrap(.~ code_station, scales = "free")+
+  ylab("MP sphericity (PC2)")+
+  ggtitle("")+
+  theme_classic(base_size = 14)+
+  theme(axis.title.x=element_blank())+
+  stat_compare_means(method = "anova")
+FA2_lau
+
+FA3_lau <- ggplot(lmp_crue_qual_lau_famd, aes(x = sampling_event, y = fa3)) +
+  geom_boxplot(fill = "grey90") +
+  #facet_wrap(.~ code_station, scales = "free")+
+  ylab("MP weight (PC3)")+
+  xlab("Sampling event")+
+  scale_x_discrete(labels=xlabslau)+
+  theme_classic(base_size = 14)+
+  stat_compare_means(method = "anova")
+FA3_lau
+
+FA4_lau <- ggplot(lmp_crue_qual_lau_famd, aes(x = sampling_event, y = fa4)) +
+  geom_boxplot(fill = "grey90") +
+  #facet_wrap(.~ code_station, scales = "free")+
+  ylab("MP colour and composition (PC4)")+
+  xlab("Sampling event")+
+  scale_x_discrete(labels=xlabslau)+
+  theme_classic(base_size = 14)+
+  stat_compare_means(method = "anova")
+FA4_lau
+
+ggarrange(ggarrange(FA1_lau, FA2_lau, ncol = 2, labels = c("", "")),  
+          ggarrange(FA3_lau, FA4_lau, ncol = 2, labels = c("", "")), 
+          nrow = 2, 
+          labels = "LAU",
+          font.label = list(size = 12))
 ```
 
 ## Changes in FA1 to FA4 with river discharge in sites MUG (displayed in blue) and GSG (in green).
@@ -1202,34 +1474,68 @@ Anova(mod) # 0.012
 ```{r fa1e4debit_plot, message=FALSE, warning=FALSE, include=FALSE}
 lmp_crue_qual_gar_famd$code_station <- factor(lmp_crue_qual_gar_famd$code_station, c("MUG", "GSG"))
 
-ggFA1 = ggplot(lmp_crue_qual_gar_famd, aes(log(debit_m3_s), fa1, colour= code_station, fill=code_station))+
-  geom_jitter(size = 3, alpha = 0.85)+
-  geom_smooth(method="lm", se=T, linetype = "dotdash", size = 0.7) +
-  #scale_color_manual(name="Sampling site", values = c("#2171b5", "#238b45"))+
-  scale_color_manual(name="Sampling site", values = c("#8c510a", "#01665e"))+
-  scale_fill_manual(name="Sampling site", values = c("#f6e8c3", "#c7eae5"))+
-  xlab(expression(paste("River discharge (log)", " (",m^{3}/s, ")"))) +  
-  ylab(expression(paste("MP dimension (PC1)"))) +
+# ggFA1 = ggplot(lmp_crue_qual_gar_famd, aes(log(debit_m3_s), fa1, colour= code_station, fill=code_station))+
+#   geom_jitter(size = 3, alpha = 0.85)+
+#   geom_smooth(method="lm", se=T, linetype = "dotdash", size = 0.7) +
+#   #scale_color_manual(name="Sampling site", values = c("#2171b5", "#238b45"))+
+#   scale_color_manual(name="Sampling site", values = c("#8c510a", "#01665e"))+
+#   scale_fill_manual(name="Sampling site", values = c("#f6e8c3", "#c7eae5"))+
+#   xlab(expression(paste("River discharge (log)", " (",m^{3}/s, ")"))) +  
+#   ylab(expression(paste("MP dimension (PC1)"))) +
+#   ggtitle("")+
+#   theme(legend.position = "none")+
+#   theme_classic(base_size=14)
+# 
+# ggFA1
+
+ggFA1 <- ggplot(lmp_crue_qual_gar_famd, 
+              aes(x = log(debit_m3_s), 
+                  y = fa1,
+                  shape = code_station,
+                  fill = code_station))+
+  geom_point(size=3)+
+  geom_smooth(method="lm", se=F, aes(linetype = code_station), size = 0.7, colour = "black") +
   ggtitle("")+
-  theme(legend.position = "none")+
-  theme_classic(base_size=14)
+  xlab(expression(paste("River discharge (log)", " (",m^{3}, s^{-1}, ")")))+ 
+  ylab(expression(paste("MP dimension (PC1)"))) +
+  theme_classic(base_size = 14) +
+  theme(legend.position = "none") +
+  labs(shape = "Sampling site", linetype = "Sampling site", fill = "Sampling site")
 
 ggFA1
 
-ggFA4 = ggplot(lmp_crue_qual_gar_famd, aes(log(debit_m3_s), fa4, colour= code_station, fill=code_station))+
-  geom_jitter(size = 3, alpha = 0.85)+
-  geom_smooth(method="lm", se=T, linetype = "dotdash", size = 0.7) +
-  #scale_color_manual(name="Sampling site", values = c("#2171b5", "#238b45"))+
-  scale_color_manual(name="Sampling site", values = c("#8c510a", "#01665e"))+
-  scale_fill_manual(name="Sampling site", values = c("#f6e8c3", "#c7eae5"))+
-  xlab(expression(paste("River discharge (log)", " (",m^{3}/s, ")"))) +  
-  ylab(expression(paste("MP colour and composition (PC4)"))) +
+# ggFA4 = ggplot(lmp_crue_qual_gar_famd, aes(log(debit_m3_s), fa4, colour= code_station, fill=code_station))+
+#   geom_jitter(size = 3, alpha = 0.85)+
+#   geom_smooth(method="lm", se=T, linetype = "dotdash", size = 0.7) +
+#   #scale_color_manual(name="Sampling site", values = c("#2171b5", "#238b45"))+
+#   scale_color_manual(name="Sampling site", values = c("#8c510a", "#01665e"))+
+#   scale_fill_manual(name="Sampling site", values = c("#f6e8c3", "#c7eae5"))+
+#   xlab(expression(paste("River discharge (log)", " (",m^{3}/s, ")"))) +  
+#   ylab(expression(paste("MP colour and composition (PC4)"))) +
+#   ggtitle("")+
+#   theme(legend.position = "none")+
+#   theme_classic(base_size=14)
+
+
+ggFA4 <- ggplot(lmp_crue_qual_gar_famd, 
+              aes(x = log(debit_m3_s), 
+                  y = fa4,
+                  shape = code_station,
+                  fill = code_station))+
+  geom_point(size=3)+
+  geom_smooth(method="lm", se=F, aes(linetype = code_station), size = 0.7, colour = "black") +
   ggtitle("")+
-  theme(legend.position = "none")+
-  theme_classic(base_size=14)
+  xlab(expression(paste("River discharge (log)", " (",m^{3}, s^{-1}, ")")))+ 
+  ylab(expression(paste("MP colour and composition (PC4)"))) +
+  theme_classic(base_size = 14) +
+  theme(legend.position = "bottom") +
+  labs(shape = "Sampling site", linetype = "Sampling site", fill = "Sampling site")
 
 ggFA4
+```
 
+
+```{r figfamddebit, message=FALSE, warning=FALSE, include=FALSE}
 ggarrange(ggFA1,ggFA4, ncol = 2, labels = c("(a)","(b)"),
           common.legend = TRUE,
           legend="bottom",
@@ -1315,61 +1621,114 @@ Anova(mod) # 0.038
 ```
 
 ```{r peflood_site_plot, include=FALSE, warning=FALSE, message=FALSE}
-PC1flood <-ggplot(pe_gar_qual_pca_mug, aes(x = flood, y = pc1)) +
-  #geom_boxplot(color = "#084594", fill = "#6baed6")+
-  geom_boxplot(colour="#8c510a", fill = "#d8b365")+
-  #geom_boxplot(fill= "gray")+
-  xlab("Flood")+
+# PC1flood <-ggplot(pe_gar_qual_pca_mug, aes(x = flood, y = pc1)) +
+#   #geom_boxplot(color = "#084594", fill = "#6baed6")+
+#   geom_boxplot(colour="#8c510a", fill = "#d8b365")+
+#   #geom_boxplot(fill= "gray")+
+#   xlab("Flood")+
+#   ylab("Hydroxyl content")+
+#   ggtitle("", subtitle="MUG")+
+#   theme_classic(base_size=14)
+# 
+
+PC1flood <- ggplot(pe_gar_qual_pca_mug, aes(x = flood, y = pc1)) +
+  geom_boxplot(fill = "grey90") +
+  facet_wrap(.~ code_station, scales = "free")+
   ylab("Hydroxyl content")+
-  ggtitle("", subtitle="MUG")+
-  theme_classic(base_size=14)
+  theme_classic(base_size = 14)+
+  theme(axis.title.x=element_blank())
+  # geom_bracket(
+  #   xmin = "Without", xmax = "With", y.position = 2.4,
+  #   label = "p < 0.01",
+  #   size = 0.3,
+  #   label.size = 4)
 
 PC1flood
 
-PC1floodgsg <-ggplot(pe_gar_qual_pca_gsg, aes(x = flood, y = pc1)) +
-  #geom_boxplot(color = "#005a32", fill = "#74c476")+
-  geom_boxplot(colour="#01665e", fill = "#5ab4ac")+
-  #geom_boxplot(fill= "gray")+
-  xlab("")+
-  ylab("")+
-  ggtitle("", subtitle="GSG")+
-  theme_classic(base_size=14)
+# PC1floodgsg <-ggplot(pe_gar_qual_pca_gsg, aes(x = flood, y = pc1)) +
+#   #geom_boxplot(color = "#005a32", fill = "#74c476")+
+#   geom_boxplot(colour="#01665e", fill = "#5ab4ac")+
+#   #geom_boxplot(fill= "gray")+
+#   xlab("")+
+#   ylab("")+
+#   ggtitle("", subtitle="GSG")+
+#   theme_classic(base_size=14)
+
+PC1floodgsg <- ggplot(pe_gar_qual_pca_gsg, aes(x = flood, y = pc1)) +
+  geom_boxplot(fill = "grey90") +
+  facet_wrap(.~ code_station, scales = "free")+
+  theme_classic(base_size = 14)+
+  theme(axis.title.x=element_blank(),
+        axis.title.y=element_blank())
 
 PC1floodgsg
 
-PC2flood <-ggplot(pe_gar_qual_pca_mug, aes(x = flood, y = pc2)) +
-  #geom_boxplot(color = "#084594", fill = "#6baed6")+
-  geom_boxplot(colour="#8c510a", fill = "#d8b365")+
-  #geom_boxplot(fill= "gray")+
-  xlab("Flood")+
+
+# PC2flood <-ggplot(pe_gar_qual_pca_mug, aes(x = flood, y = pc2)) +
+#   #geom_boxplot(color = "#084594", fill = "#6baed6")+
+#   geom_boxplot(colour="#8c510a", fill = "#d8b365")+
+#   #geom_boxplot(fill= "gray")+
+#   xlab("Flood")+
+#   ylab("Carbonyl content")+
+#   ggtitle("", subtitle="MUG")+
+#   theme_classic(base_size=14)+
+#   coord_cartesian(clip = "off")+
+#   geom_bracket(
+#       xmin = "Without", xmax = "With", y.position = 0.6,
+#           label = "p = 0.033"
+#             )
+
+xlabsmug <- paste(levels(pe_gar_qual_pca_mug$flood),"\n(n=",table(pe_gar_qual_pca_mug$flood),")",sep="")
+PC2flood <- ggplot(pe_gar_qual_pca_mug, aes(x = flood, y = pc2)) +
+  geom_boxplot(fill = "grey90") +
   ylab("Carbonyl content")+
-  ggtitle("", subtitle="MUG")+
-  theme_classic(base_size=14)+
-  coord_cartesian(clip = "off")+
+  xlab("Flood")+
+  theme_classic(base_size = 14)+
+  scale_x_discrete(labels=xlabsmug)+
   geom_bracket(
-      xmin = "Without", xmax = "With", y.position = 0.6,
-          label = "p = 0.033"
-            )
+    xmin = "Without", xmax = "With", y.position = 0.6,
+    label = "p = 0.033",
+    size = 0.3,
+    label.size = 4)
 
 PC2flood
 
-PC2floodgsg <-ggplot(pe_gar_qual_pca_gsg, aes(x = flood, y = pc2)) +
-  #geom_boxplot(color = "#005a32", fill = "#74c476")+
-  geom_boxplot(colour="#01665e", fill = "#5ab4ac")+
-  #geom_boxplot(fill= "gray")+
-  xlab("")+
-  ylab("")+
-  ggtitle("", subtitle="GSG")+
-  theme_classic(base_size=14)+
-  coord_cartesian(clip = "off")+
-  geom_bracket(
-      xmin = "Without", xmax = "With", y.position = 0.23,
-          label = "p = 0.038"
-            )
-PC2floodgsg
 
-ggarrange(ggarrange(PC1flood, PC1floodgsg, ncol = 2, labels = c("(a)", "")),  
-          ggarrange(PC2flood, PC2floodgsg, ncol = 2, labels = c("(b)", "", "")), 
+# PC2floodgsg <-ggplot(pe_gar_qual_pca_gsg, aes(x = flood, y = pc2)) +
+#   #geom_boxplot(color = "#005a32", fill = "#74c476")+
+#   geom_boxplot(colour="#01665e", fill = "#5ab4ac")+
+#   #geom_boxplot(fill= "gray")+
+#   xlab("")+
+#   ylab("")+
+#   ggtitle("", subtitle="GSG")+
+#   theme_classic(base_size=14)+
+#   coord_cartesian(clip = "off")+
+#   geom_bracket(
+#       xmin = "Without", xmax = "With", y.position = 0.23,
+#           label = "p = 0.038"
+#             )
+
+
+xlabsgsg <- paste(levels(pe_gar_qual_pca_gsg$flood),"\n(n=",table(pe_gar_qual_pca_gsg$flood),")",sep="")
+PC2floodgsg <- ggplot(pe_gar_qual_pca_gsg, aes(x = flood, y = pc2)) +
+  geom_boxplot(fill = "grey90") +
+  xlab("Flood")+
+  theme_classic(base_size = 14)+
+  scale_x_discrete(labels=xlabsgsg)+
+  theme(axis.title.y=element_blank())+
+  geom_bracket(
+    xmin = "Without", xmax = "With", y.position = 0.23,
+    label = "p = 0.038",
+    size = 0.3,
+    label.size = 4)
+
+PC2floodgsg
+```
+
+
+```{r figpcaflood, include=FALSE, warning=FALSE, message=FALSE}
+ggarrange(ggarrange(PC1flood, PC1floodgsg, ncol = 2, labels = c("(a)", "(b)")),  
+          ggarrange(PC2flood, PC2floodgsg, ncol = 2, labels = c( "", "")), 
           nrow = 2, 
           labels = "",
           font.label = list(size = 12))
